@@ -5,22 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-import java.util.List;
-
 @Entity
-@Table( name = "Lists" )
+@Table( name= "Products" )
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShoppingList {
+public class Product {
     @Id
     private String id;
     private String name;
-    private Instant date;
+    private Integer quantity;
+    private ProductStatus status;
     @ManyToOne
-    @JoinColumn( name= "user_id" )
-    private User user;
-    @OneToMany( mappedBy= "shoppingList" )
-    private List<Product> products;
+    @JoinColumn( name= "list_id" )
+    private ShoppingList list;
 }

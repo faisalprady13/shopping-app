@@ -18,6 +18,6 @@ public class User {
     @Id
     private String id;
     private String name;
-    @OneToMany(mappedBy = "user")
+    @OneToMany( mappedBy= "user" )
     private List<ShoppingList> shoppingLists;
 }
