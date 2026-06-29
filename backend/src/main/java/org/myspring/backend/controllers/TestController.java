@@ -11,9 +11,6 @@ class TestController {
 
     @GetMapping
     String getMessage() {
-        System.out.println("getMessage");
-        System.out.println("getMessage");
-        System.out.println("getMessage");
         return "Hello World!";
     }
 }
