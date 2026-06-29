@@ -21,6 +21,6 @@ public class ShoppingList {
     @ManyToOne
     @JoinColumn( name= "user_id" )
     private User user;
-    @OneToMany( mappedBy= "shoppingList" )
+    @OneToMany( mappedBy= "list" )
     private List<Product> products;
 }
