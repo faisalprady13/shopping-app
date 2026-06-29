@@ -6,42 +6,6 @@ import './App.css';
 
 function App() {
   const [count, setCount] = useState(0);
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
-  console.log('asd');
   return (
     <>
       <section id="center">
