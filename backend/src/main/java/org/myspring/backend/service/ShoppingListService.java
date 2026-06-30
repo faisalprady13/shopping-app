@@ -4,6 +4,7 @@ import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.repository.ListRepo;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -17,6 +18,6 @@ public class ShoppingListService {
     }
 
     public List<ShoppingList> getLists(){
-        return null;
+        return listRepo.findAll();
     }
 }

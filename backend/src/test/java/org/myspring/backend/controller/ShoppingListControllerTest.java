@@ -1,12 +1,56 @@
 package org.myspring.backend.controller;
 
 import org.junit.jupiter.api.Test;
+import org.myspring.backend.model.ShoppingList;
+import org.myspring.backend.model.User;
+import org.myspring.backend.repository.ListRepo;
+import org.myspring.backend.repository.ProductRepo;
+import org.myspring.backend.repository.UserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
+import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
+@SpringBootTest
+@AutoConfigureMockMvc
+@DirtiesContext(classMode= DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ShoppingListControllerTest {
+    @Autowired
+    private MockMvc mvc;
+    @Autowired
+    private ListRepo listRepo;
+    @Autowired
+    private UserRepo userRepo;
+    @Autowired
+    private ProductRepo productRepo;
 
     @Test
-    void getAllLists() {
+    void getAllLists_shouldReturnEmptyJson_whenInitiallyStarted() throws Exception {
+        mvc.perform(get("/api/lists"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
+
+    @Test
+    void getAllLists_shouldReturnJsonList_whenCalled() throws Exception {
+        Instant date= Instant.now();
+        User user= new User("6", "Max");
+        ShoppingList shoppingList= new ShoppingList("1",
+                                                "Test",
+                                                        date, user);
+        ObjectMapper mapper= new ObjectMapper();
+        String jsonList= "[" + mapper.writeValueAsString(shoppingList) + "]";
+
+        userRepo.save(user);
+        listRepo.save(shoppingList);
+        mvc.perform(get("/api/lists"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonList));
     }
 }
