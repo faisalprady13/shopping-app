@@ -1,5 +1,6 @@
 package org.myspring.backend.service;
 
+import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.model.User;
@@ -21,9 +22,7 @@ class ShoppingListServiceTest {
         IdService mockingIdService= mock(IdService.class);
         ShoppingListService service= new ShoppingListService(mockingRepro, mockingIdService);
         Instant date= Instant.now();
-        User user= new User();
-        Product product= new Product();
-        List<Product> products= new ArrayList<>(List.of(product));
+        User user= new User("6", "Max");
         ShoppingList shoppingList= new ShoppingList("1", "Test",
                                                     date, user);
         List<ShoppingList> expected= new ArrayList<>(List.of(shoppingList));
@@ -44,5 +43,25 @@ class ShoppingListServiceTest {
 
         actual= service.getLists();
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void saveList_shouldReturnShoppingList_whenSaved(){
+//        ListRepo mockingRepro= mock(ListRepo.class);
+//        IdService mockingIdService= mock(IdService.class);
+//        ShoppingListService service= new ShoppingListService(mockingRepro, mockingIdService);
+//        String id= "1";
+//        String name= "Test";
+//        Instant date= Instant.now();
+//        User user= new User("6", "Max");
+//        ShoppingListDTO shopList= new ShoppingListDTO(name, user);
+//        ShoppingList expected= new ShoppingList(id, name,
+//                                                date, user);
+//        ShoppingList actual;
+//
+//        when(mockingIdService.generateId()).thenReturn(id);
+//        when(mockingRepro.save(expected)).thenReturn(expected);
+//        actual= service.saveList(shopList);
+//        assertEquals(expected, actual);
     }
 }
