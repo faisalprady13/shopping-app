@@ -2,7 +2,7 @@ import type { FormEvent } from 'react'
 import type { ShoppingList } from '../types'
 
 type DetailseiteProps = {
-  activeList: ShoppingList
+  shoppingList: ShoppingList
   productName: string
   quantity: string
   onProductNameChange: (productName: string) => void
@@ -14,7 +14,7 @@ type DetailseiteProps = {
 }
 
 const Detailseite = ({
-  activeList,
+  shoppingList,
   productName,
   quantity,
   onProductNameChange,
@@ -32,15 +32,15 @@ const Detailseite = ({
       </header>
 
       <div className="details-list-row">
-        <strong>{activeList.title}</strong>
+        <strong>{shoppingList.title}</strong>
         <button type="button" onClick={onBack}>
           back
         </button>
       </div>
 
       <div className="details-content">
-        <ul className="items-list" aria-label={`${activeList.title} Produkte`}>
-          {activeList.items.map((item) => (
+        <ul className="items-list" aria-label={`${shoppingList.title} Produkte`}>
+          {shoppingList.items.map((item) => (
             <li className={item.completed ? 'completed' : ''} key={item.id}>
               <button
                 className="check-button"

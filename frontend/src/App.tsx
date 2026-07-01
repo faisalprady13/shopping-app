@@ -1,5 +1,4 @@
-import { StrictMode } from 'react'
-import { useState } from 'react'
+import { StrictMode, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createRoot } from 'react-dom/client'
 import './App.css'
@@ -36,15 +35,15 @@ const initialLists: ShoppingList[] = [
 export function App() {
   const [screen, setScreen] = useState<Screen>('start')
   const [username, setUsername] = useState('')
-  const [lists, setLists] = useState<ShoppingList[]>(initialLists)
-  const [activeListId, setActiveListId] = useState(initialLists[0].id)
+  const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>(initialLists)
+  const [selectedListId, setSelectedListId] = useState(initialLists[0].id)
   const [productName, setProductName] = useState('')
   const [quantity, setQuantity] = useState('1')
 
-  const activeList = lists.find((list) => list.id === activeListId)
+  const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
 
-  const login = (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (username.trim() === '') {
@@ -54,13 +53,13 @@ export function App() {
     setScreen('lists')
   }
 
-  const logout = () => {
+  const handleLogout = () => {
     setUsername('')
     setScreen('start')
   }
 
-  const addList = () => {
-    const nextNumber = lists.length + 1
+  const handleAddList = () => {
+    const nextNumber = shoppingLists.length + 1
     const today = new Intl.DateTimeFormat('de-DE').format(new Date())
 
     const newList: ShoppingList = {
@@ -70,25 +69,25 @@ export function App() {
       items: [],
     }
 
-    const updatedLists = [newList, ...lists]
+    const updatedLists = [newList, ...shoppingLists]
 
-    setLists(updatedLists)
-    setActiveListId(newList.id)
+    setShoppingLists(updatedLists)
+    setSelectedListId(newList.id)
     setScreen('details')
   }
 
-  const openList = (listId: number) => {
-    setActiveListId(listId)
+  const handleOpenList = (listId: number) => {
+    setSelectedListId(listId)
     setScreen('details')
   }
 
-  const addItem = (event: FormEvent<HTMLFormElement>) => {
+  const handleAddItem = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const trimmedName = productName.trim()
     const trimmedQuantity = quantity.trim()
 
-    if (trimmedName === '' || !activeList) {
+    if (trimmedName === '' || !selectedList) {
       return
     }
 
@@ -99,8 +98,8 @@ export function App() {
       completed: false,
     }
 
-    const updatedLists = lists.map((list) => {
-      if (list.id !== activeList.id) {
+    const updatedLists = shoppingLists.map((list) => {
+      if (list.id !== selectedList.id) {
         return list
       }
 
@@ -110,18 +109,18 @@ export function App() {
       }
     })
 
-    setLists(updatedLists)
+    setShoppingLists(updatedLists)
     setProductName('')
     setQuantity('1')
   }
 
-  const toggleItem = (itemId: number) => {
-    if (!activeList) {
+  const handleToggleItem = (itemId: number) => {
+    if (!selectedList) {
       return
     }
 
-    const updatedLists = lists.map((list) => {
-      if (list.id !== activeList.id) {
+    const updatedLists = shoppingLists.map((list) => {
+      if (list.id !== selectedList.id) {
         return list
       }
 
@@ -142,16 +141,16 @@ export function App() {
       }
     })
 
-    setLists(updatedLists)
+    setShoppingLists(updatedLists)
   }
 
-  const deleteItem = (itemId: number) => {
-    if (!activeList) {
+  const handleDeleteItem = (itemId: number) => {
+    if (!selectedList) {
       return
     }
 
-    const updatedLists = lists.map((list) => {
-      if (list.id !== activeList.id) {
+    const updatedLists = shoppingLists.map((list) => {
+      if (list.id !== selectedList.id) {
         return list
       }
 
@@ -163,46 +162,53 @@ export function App() {
       }
     })
 
-    setLists(updatedLists)
+    setShoppingLists(updatedLists)
   }
 
-  const deleteList = (listId: number) => {
-    const remainingLists = lists.filter((list) => list.id !== listId)
+  const handleDeleteList = (listId: number) => {
+    const remainingLists = shoppingLists.filter((list) => list.id !== listId)
 
-    if (activeListId === listId && remainingLists.length > 0) {
-      setActiveListId(remainingLists[0].id)
+    if (selectedListId === listId && remainingLists.length > 0) {
+      setSelectedListId(remainingLists[0].id)
     }
 
-    setLists(remainingLists)
+    setShoppingLists(remainingLists)
+  }
+
+  let page = <Startseite username={username} onUsernameChange={setUsername} onLogin={handleLogin} />
+
+  if (screen === 'lists') {
+    page = (
+      <Listenseite
+        lists={shoppingLists}
+        onAddList={handleAddList}
+        onOpenList={handleOpenList}
+        onDeleteList={handleDeleteList}
+      />
+    )
+  }
+
+  if (screen === 'details' && selectedList) {
+    page = (
+      <Detailseite
+        shoppingList={selectedList}
+        productName={productName}
+        quantity={quantity}
+        onProductNameChange={setProductName}
+        onQuantityChange={setQuantity}
+        onBack={() => setScreen('lists')}
+        onAddItem={handleAddItem}
+        onToggleItem={handleToggleItem}
+        onDeleteItem={handleDeleteItem}
+      />
+    )
   }
 
   return (
     <div className="app-shell">
-      <Header username={username} isLoggedIn={isLoggedIn} onLogout={logout} />
+      <Header username={username} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
 
-      <main className="app-content">
-        {screen === 'start' ? (
-          <Startseite username={username} onUsernameChange={setUsername} onLogin={login} />
-        ) : null}
-
-        {screen === 'lists' ? (
-          <Listenseite lists={lists} onAddList={addList} onOpenList={openList} onDeleteList={deleteList} />
-        ) : null}
-
-        {screen === 'details' && activeList ? (
-          <Detailseite
-            activeList={activeList}
-            productName={productName}
-            quantity={quantity}
-            onProductNameChange={setProductName}
-            onQuantityChange={setQuantity}
-            onBack={() => setScreen('lists')}
-            onAddItem={addItem}
-            onToggleItem={toggleItem}
-            onDeleteItem={deleteItem}
-          />
-        ) : null}
-      </main>
+      <main className="app-content">{page}</main>
 
       <Footer />
     </div>
