@@ -22,6 +22,6 @@ public class ShoppingList {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
 }
