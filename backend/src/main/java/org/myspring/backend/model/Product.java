@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table( name= "Products" )
+@Table(name = "Products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +17,6 @@ public class Product {
     private Integer quantity;
     private ProductStatus status;
     @ManyToOne
-    @JoinColumn( name= "list_id" )
-    private ShoppingList list;
+    @JoinColumn(name = "list_id")
+    private ShoppingList shoppingList;
 }
