@@ -26,7 +26,6 @@ public class User {
     @UuidGenerator
     private UUID id;
     private String name;
-    @OneToMany(mappedBy = "user")
     private List<ShoppingList> shoppingLists;
 
     public User(UserDto userDto) {
