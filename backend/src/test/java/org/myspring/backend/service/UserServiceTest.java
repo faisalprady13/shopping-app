@@ -1,14 +1,15 @@
 package org.myspring.backend.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.myspring.backend.dto.UserDto;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.UserRepo;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,5 +30,15 @@ class UserServiceTest {
 
     @Test
     void createUser() {
+        UserDto userDto = new UserDto("jane doe", null);
+        User savedUser = User.builder().name("jane doe").build();
+
+        when(userRepo.save(any(User.class))).thenReturn(savedUser);
+
+        UserService userService = new UserService(userRepo);
+        User result = userService.createUser(userDto);
+
+        assertEquals(savedUser, result);
+        assertEquals("jane doe", result.getName());
     }
 }
