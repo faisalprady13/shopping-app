@@ -1,9 +1,6 @@
 package org.myspring.backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +23,7 @@ public class User {
     @UuidGenerator
     private UUID id;
     private String name;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShoppingList> shoppingLists;
 
     public User(UserDto userDto) {
