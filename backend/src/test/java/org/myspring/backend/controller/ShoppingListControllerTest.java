@@ -1,6 +1,7 @@
 package org.myspring.backend.controller;
 
 import org.junit.jupiter.api.Test;
+import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.ListRepo;
@@ -9,10 +10,12 @@ import org.myspring.backend.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,11 +42,11 @@ class ShoppingListControllerTest {
 
     @Test
     void getAllLists_shouldReturnJsonList_whenCalled() throws Exception {
-        Instant date= Instant.now();
-        User user= new User("6", "Max");
-        ShoppingList shoppingList= new ShoppingList("1",
-                                                "Test",
-                                                        date, user);
+        Instant date= Instant.now().truncatedTo(ChronoUnit.SECONDS);
+        User user= new User("6", "Max", null);
+        ShoppingList shoppingList= new ShoppingList("1", "Test",
+                                                        date, user,
+                                                null);
         ObjectMapper mapper= new ObjectMapper();
         String jsonList= "[" + mapper.writeValueAsString(shoppingList) + "]";
 
@@ -52,5 +55,26 @@ class ShoppingListControllerTest {
         mvc.perform(get("/api/lists"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
+    }
+
+    @Test
+    void createList_shouldReturnShoppingList_whenCreated() throws Exception {
+        User user= new User("6", "Max", null);
+        ShoppingListDTO shoppingList= new ShoppingListDTO("Test", user);
+        ObjectMapper mapper= new ObjectMapper();
+        String jsonList= mapper.writeValueAsString(shoppingList);
+
+        userRepo.save(user);
+        mvc.perform(post("/api/lists")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonList))
+                    .andExpect(status().isCreated())
+                    .andExpect(content().json("""
+                        {
+                          name: "Test"
+                        }
+                    """))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.date").isNotEmpty());
     }
 }

@@ -1,8 +1,10 @@
 package org.myspring.backend.controller;
 
 import org.myspring.backend.dto.ShoppingListDTO;
+import org.myspring.backend.exception.UserIdNotFound;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.service.ShoppingListService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +24,8 @@ public class ShoppingListController {
     }
 
     @PostMapping
-    public ShoppingList createList(@RequestBody ShoppingListDTO shopList){
+    @ResponseStatus(HttpStatus.CREATED)
+    public ShoppingList createList(@RequestBody ShoppingListDTO shopList) throws UserIdNotFound {
         return listService.saveList(shopList);
     }
 }

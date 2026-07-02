@@ -1,5 +1,7 @@
 package org.myspring.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,7 +22,9 @@ public class ShoppingList {
     private Instant date;
     @ManyToOne
     @JoinColumn( name= "user_id" )
+    @JsonBackReference
     private User user;
-//    @OneToMany( mappedBy= "list" )
-//    private List<Product> products;
+    @OneToMany( mappedBy= "list" )
+    @JsonManagedReference
+    private List<Product> products;
 }
