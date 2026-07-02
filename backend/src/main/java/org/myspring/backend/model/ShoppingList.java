@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table( name = "Lists" )
+@Table(name = "Lists")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,8 +19,9 @@ public class ShoppingList {
     private String name;
     private Instant date;
     @ManyToOne
-    @JoinColumn( name= "user_id" )
+    @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany( mappedBy= "list" )
+
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
 }
