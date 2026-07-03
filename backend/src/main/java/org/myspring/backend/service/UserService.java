@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepo userRepo;
 
+    private final IdService idService;
+
     public User getUserByName(String name) {
         return userRepo.findByName(name);
     }
 
     public User createUser(UserDto userDto) {
-        return userRepo.save(new User(userDto));
+        return userRepo.save(new User(idService.generateId(), userDto));
     }
 }

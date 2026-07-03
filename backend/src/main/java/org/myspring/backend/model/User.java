@@ -21,16 +21,15 @@ import java.util.UUID;
 @Builder
 public class User {
     @Id
-    @UuidGenerator
-    private UUID id;
+    private String id;
     private String name;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ShoppingList> shoppingLists;
 
-    public User(UserDto userDto) {
+    public User(String id, UserDto userDto) {
         List<ShoppingList> shoppingLists = userDto.shoppingLists() == null || userDto.shoppingLists().length == 0 ?
                 new ArrayList<>() : new ArrayList<>(List.of(userDto.shoppingLists()));
-        this(null, userDto.name(), shoppingLists);
+        this(id, userDto.name(), shoppingLists);
     }
 }

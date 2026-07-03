@@ -10,6 +10,7 @@ import org.myspring.backend.repository.UserRepo;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,11 +20,13 @@ class UserServiceTest {
 
     @Test
     void getUserByName() {
-        User user = User.builder().name("john doe").build();
+        IdService mockingIdService = mock(IdService.class);
+        String id = mockingIdService.generateId();
+        User user = User.builder().id(id).name("john doe").build();
 
         when(userRepo.findByName("john doe")).thenReturn(user);
 
-        UserService userService = new UserService(userRepo);
+        UserService userService = new UserService(userRepo, mockingIdService);
 
         assertEquals(user, userService.getUserByName("john doe"));
     }
@@ -31,11 +34,13 @@ class UserServiceTest {
     @Test
     void createUser() {
         UserDto userDto = new UserDto("jane doe", null);
-        User savedUser = User.builder().name("jane doe").build();
+        IdService mockingIdService = mock(IdService.class);
+        String id = mockingIdService.generateId();
+        User savedUser = User.builder().id(id).name("jane doe").build();
 
         when(userRepo.save(any(User.class))).thenReturn(savedUser);
 
-        UserService userService = new UserService(userRepo);
+        UserService userService = new UserService(userRepo, mockingIdService);
         User result = userService.createUser(userDto);
 
         assertEquals(savedUser, result);
