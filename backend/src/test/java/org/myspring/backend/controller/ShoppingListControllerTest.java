@@ -2,6 +2,7 @@ package org.myspring.backend.controller;
 
 import org.junit.jupiter.api.Test;
 import org.myspring.backend.dto.ShoppingListDTO;
+import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.ListRepo;
@@ -16,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,9 +47,9 @@ class ShoppingListControllerTest {
     void getAllLists_shouldReturnJsonList_whenCalled() throws Exception {
         Instant date= Instant.now().truncatedTo(ChronoUnit.SECONDS);
         User user= new User("6", "Max", null);
+        List<Product> products= Collections.emptyList();
         ShoppingList shoppingList= new ShoppingList("1", "Test",
-                                                        date, user,
-                                                null);
+                                                        date, user, products);
         ObjectMapper mapper= new ObjectMapper();
         String jsonList= "[" + mapper.writeValueAsString(shoppingList) + "]";
 

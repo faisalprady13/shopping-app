@@ -2,6 +2,7 @@ package org.myspring.backend.service;
 
 import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.exception.UserIdNotFound;
+import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.ListRepo;
@@ -62,9 +63,10 @@ class ShoppingListServiceTest {
         String name= "Test";
         Instant date= Instant.now().truncatedTo(ChronoUnit.SECONDS);
         User user= new User(uid, "Max", null);
+        List<Product> products= Collections.emptyList();
         ShoppingListDTO shopList= new ShoppingListDTO(name, user);
         ShoppingList expected= new ShoppingList(id, name,
-                                                date, user, null);
+                                                date, user, products);
         ShoppingList actual;
 
         when(mockingIdService.generateId()).thenReturn(id);

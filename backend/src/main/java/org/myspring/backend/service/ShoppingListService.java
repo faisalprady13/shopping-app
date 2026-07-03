@@ -2,6 +2,7 @@ package org.myspring.backend.service;
 
 import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.exception.UserIdNotFound;
+import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.ListRepo;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -42,11 +44,12 @@ public class ShoppingListService {
         String id= idService.generateId();
         Instant timestamp= Instant.now().truncatedTo(ChronoUnit.SECONDS);
         User listOwner= listDTO.user();
+        List<Product> products= Collections.emptyList();
 
         if (userRepo.findUserById(listOwner.getId()) != null) {
             newList = new ShoppingList(id, listDTO.name(),
                                         timestamp, listOwner,
-                                        null);
+                                        products);
             listRepo.save(newList);
             return newList;
         } else {
