@@ -1,6 +1,7 @@
 package org.myspring.backend.controller;
 
 import org.myspring.backend.dto.ShoppingListDTO;
+import org.myspring.backend.exception.ListIdNotFound;
 import org.myspring.backend.exception.UserIdNotFound;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.service.ShoppingListService;
@@ -21,6 +22,11 @@ public class ShoppingListController {
     @GetMapping
     public List<ShoppingList> getAllLists(){
         return listService.getLists();
+    }
+
+    @GetMapping("/{id}")
+    public ShoppingList getListById(@PathVariable String id) throws ListIdNotFound {
+        return listService.getListById(id);
     }
 
     @PostMapping

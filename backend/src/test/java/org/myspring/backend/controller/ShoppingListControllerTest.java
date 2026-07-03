@@ -80,4 +80,33 @@ class ShoppingListControllerTest {
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.date").isNotEmpty());
     }
+
+    @Test
+    void getListById_shouldReturnShoppingList_whenFound() throws Exception {
+        String id= "1";
+        Instant date= Instant.now().truncatedTo(ChronoUnit.SECONDS);
+        User user= new User("6", "Max", null);
+        List<Product> products= Collections.emptyList();
+        ShoppingList shoppingList= new ShoppingList(id, "Test",
+                                                    date, user, products);
+        ObjectMapper mapper= new ObjectMapper();
+        String jsonList= mapper.writeValueAsString(shoppingList);
+
+        userRepo.save(user);
+        listRepo.save(shoppingList);
+        mvc.perform(get("/api/lists/" + id))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonList));
+    }
+
+    @Test
+    void getListById_shouldThrowException_whenNotFound() throws Exception {
+        String id= "0";
+        String errorMessage= "Die Einkaufsliste wurde nicht gefunden: ";
+
+        errorMessage+= "List with id 0 not found!";
+        mvc.perform(get("/api/lists/" + id))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(errorMessage));
+    }
 }

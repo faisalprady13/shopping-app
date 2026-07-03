@@ -13,4 +13,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public String handeUserIdNotFound(UserIdNotFound except){
         return "Ein Fehler ist aufgetreten: " + except.getLocalizedMessage();
     }
+
+    @ExceptionHandler(ListIdNotFound.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handeUserIdNotFound(ListIdNotFound except){
+        return "Die Einkaufsliste wurde nicht gefunden: " + except.getLocalizedMessage();
+    }
 }

@@ -1,6 +1,7 @@
 package org.myspring.backend.service;
 
 import org.myspring.backend.dto.ShoppingListDTO;
+import org.myspring.backend.exception.ListIdNotFound;
 import org.myspring.backend.exception.UserIdNotFound;
 import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ShoppingList;
@@ -34,10 +35,27 @@ public class ShoppingListService {
         return listRepo.findAll();
     }
 
+    /** Returns the shopping list with the requested ID.
+     *
+     * @param id to search for
+     * @return found ShoppingList
+     * @throws ListIdNotFound when id not exist
+     */
+    public ShoppingList getListById(String id) throws ListIdNotFound {
+        ShoppingList list= listRepo.findById(id).orElse(null);
+
+        if (list != null) {
+            return list;
+        } else {
+            throw new ListIdNotFound("List with id " + id + " not found!");
+        }
+    }
+
     /** Create a new shopping list and save it.
      *
      * @param listDTO name and user for new list
      * @return saved list
+     * @throws UserIdNotFound when user not exist
      */
     public ShoppingList saveList(ShoppingListDTO listDTO) throws UserIdNotFound {
         ShoppingList newList;
