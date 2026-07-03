@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Service
@@ -25,7 +26,17 @@ public class ProductService {
 
     public void addProductToShoppingList(ProductDto productDto) {
         Product product = new Product(productDto);
-        //set shopping list here first
+        //TODO: set product to shopping list
         productRepo.save(product);
+    }
+
+    public void updateProduct(ProductDto productDto) {
+        Product oldProduct = productRepo.findProductById(productDto.id());
+        Product newProduct = new Product(productDto, oldProduct);
+        productRepo.save(newProduct);
+    }
+
+    public void deleteProduct(UUID productId) {
+        productRepo.deleteById(productId);
     }
 }

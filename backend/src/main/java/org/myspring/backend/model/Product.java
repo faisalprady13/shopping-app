@@ -19,7 +19,7 @@ public class Product {
     @UuidGenerator
     private UUID id;
     private String name;
-    private Integer quantity;
+    private int quantity;
     private ProductStatus status;
     @ManyToOne
     @JoinColumn(name = "list_id")
@@ -28,5 +28,13 @@ public class Product {
 
     public Product(ProductDto productDto) {
         this(null, productDto.name(), productDto.quantity(), productDto.status(), null);
+    }
+
+
+    public Product(ProductDto newProductDto, Product oldProduct) {
+        String name = !newProductDto.name().isEmpty() ? newProductDto.name() : oldProduct.getName();
+        int quantity = newProductDto.quantity() != null && newProductDto.quantity() > 0 ? newProductDto.quantity() : oldProduct.getQuantity();
+        ProductStatus status = newProductDto.status() != null ? newProductDto.status() : oldProduct.getStatus();
+        this(oldProduct.getId(), name, quantity, status, oldProduct.getShoppingList());
     }
 }
