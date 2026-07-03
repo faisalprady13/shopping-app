@@ -5,7 +5,6 @@ import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.exception.ListIdNotFound;
 import org.myspring.backend.exception.ProductNotFound;
 import org.myspring.backend.exception.UserIdNotFound;
-import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.service.ShoppingListService;
 import org.springframework.http.HttpStatus;
