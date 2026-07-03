@@ -28,14 +28,6 @@ public class Product {
         this(id, productDto.name(), productDto.quantity(), productDto.status(), null);
     }
 
-
-    public Product(ProductDTO newProductDTO, Product oldProduct) {
-        String name = !newProductDTO.name().isEmpty() ? newProductDTO.name() : oldProduct.name;
-        int quantity = newProductDTO.quantity() != null && newProductDTO.quantity() > 0 ? newProductDTO.quantity() : oldProduct.quantity;
-        ProductStatus status = newProductDTO.status() != null ? newProductDTO.status() : oldProduct.status;
-        this(oldProduct.id, name, quantity, status, oldProduct.shoppingList);
-    }
-
     public void update(ProductDTO productDto) {
         this.name = productDto.name() != null ? productDto.name() : this.name;
         this.quantity = productDto.quantity() != null && productDto.quantity() > 0 ? productDto.quantity() : this.quantity;
