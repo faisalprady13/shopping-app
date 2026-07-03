@@ -3,15 +3,11 @@ package org.myspring.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.myspring.backend.dto.ProductDto;
-import org.myspring.backend.dto.UserDto;
 import org.myspring.backend.model.Product;
-import org.myspring.backend.model.User;
 import org.myspring.backend.repository.ProductRepo;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 
