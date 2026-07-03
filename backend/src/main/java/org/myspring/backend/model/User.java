@@ -6,19 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UuidGenerator;
-import org.myspring.backend.dto.UserDto;
+import org.myspring.backend.dto.UserDTO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "Users")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 public class User {
     @Id
     private String id;
@@ -27,9 +25,9 @@ public class User {
     @JsonManagedReference
     private List<ShoppingList> shoppingLists;
 
-    public User(String id, UserDto userDto) {
-        List<ShoppingList> list = userDto.shoppingLists() == null || userDto.shoppingLists().length == 0 ?
-                new ArrayList<>() : new ArrayList<>(List.of(userDto.shoppingLists()));
+    public User(String id, UserDTO userDto) {
+        ArrayList<ShoppingList> list = userDto.shoppingLists() == null || userDto.shoppingLists().isEmpty() ?
+                new ArrayList<>() : new ArrayList<>(userDto.shoppingLists());
         this(id, userDto.name(), list);
     }
 }

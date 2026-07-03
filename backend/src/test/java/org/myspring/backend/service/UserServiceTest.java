@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.myspring.backend.dto.UserDto;
+import org.myspring.backend.dto.UserDTO;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.UserRepo;
 
@@ -33,7 +33,7 @@ class UserServiceTest {
 
     @Test
     void createUser() {
-        UserDto userDto = new UserDto("jane doe", null);
+        UserDTO userDto = new UserDTO("jane doe", null);
         IdService mockingIdService = mock(IdService.class);
         String id = mockingIdService.generateId();
         User savedUser = User.builder().id(id).name("jane doe").build();
