@@ -2,5 +2,7 @@ package org.myspring.backend.dto;
 
 import org.myspring.backend.model.ShoppingList;
 
-public record UserDTO(String name, ShoppingList[] shoppingLists) {
+import java.util.ArrayList;
+
+public record UserDTO(String name, ArrayList<ShoppingList> shoppingLists) {
 }

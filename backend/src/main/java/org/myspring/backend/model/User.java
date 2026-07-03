@@ -26,8 +26,8 @@ public class User {
     private List<ShoppingList> shoppingLists;
 
     public User(String id, UserDTO userDto) {
-        List<ShoppingList> list = userDto.shoppingLists() == null || userDto.shoppingLists().length == 0 ?
-                new ArrayList<>() : new ArrayList<>(List.of(userDto.shoppingLists()));
+        ArrayList<ShoppingList> list = userDto.shoppingLists() == null || userDto.shoppingLists().isEmpty() ?
+                new ArrayList<>() : new ArrayList<>(userDto.shoppingLists());
         this(id, userDto.name(), list);
     }
 }
