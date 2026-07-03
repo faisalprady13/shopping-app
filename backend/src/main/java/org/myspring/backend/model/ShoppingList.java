@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table( name = "Lists" )
+@Table(name = "Lists")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,8 +23,8 @@ public class ShoppingList {
     @ManyToOne
     @JoinColumn( name= "user_id" )
     @JsonBackReference
-    private User user;
-    @OneToMany( mappedBy= "list" )
+    private User user; 
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Product> products;
 }

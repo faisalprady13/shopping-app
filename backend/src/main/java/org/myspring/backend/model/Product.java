@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table( name= "Products" )
+@Table(name = "Products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,5 +20,5 @@ public class Product {
     @ManyToOne
     @JoinColumn( name= "list_id" )
     @JsonBackReference
-    private ShoppingList list;
+    private ShoppingList shoppingList;
 }
