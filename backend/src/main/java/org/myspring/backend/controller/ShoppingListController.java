@@ -1,8 +1,11 @@
 package org.myspring.backend.controller;
 
+import org.myspring.backend.dto.ProductDTO;
 import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.exception.ListIdNotFound;
+import org.myspring.backend.exception.ProductNotFound;
 import org.myspring.backend.exception.UserIdNotFound;
+import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.service.ShoppingListService;
 import org.springframework.http.HttpStatus;
@@ -20,7 +23,7 @@ public class ShoppingListController {
     }
 
     @GetMapping
-    public List<ShoppingList> getAllLists(){
+    public List<ShoppingList> getAllLists() {
         return listService.getLists();
     }
 
@@ -33,5 +36,20 @@ public class ShoppingListController {
     @ResponseStatus(HttpStatus.CREATED)
     public ShoppingList createList(@RequestBody ShoppingListDTO shopList) throws UserIdNotFound {
         return listService.saveList(shopList);
+    }
+
+    @PostMapping("/add-product")
+    public ShoppingList addProduct(@RequestBody ProductDTO productDto) throws ListIdNotFound {
+        return listService.addProductToShoppingList(productDto);
+    }
+
+    @PutMapping("/update-product")
+    public ShoppingList updateProduct(@RequestBody ProductDTO productDto) throws ListIdNotFound, ProductNotFound {
+        return listService.updateProductInShoppingList(productDto);
+    }
+
+    @DeleteMapping("/remove-product")
+    public ShoppingList removeProduct(@RequestBody ProductDTO productDto) throws ListIdNotFound {
+        return listService.removeProductFromShoppingList(productDto);
     }
 }

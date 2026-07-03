@@ -12,19 +12,37 @@ import java.util.List;
 
 @Entity
 @Table(name = "Lists")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class ShoppingList {
     @Id
     private String id;
     private String name;
     private Instant date;
     @ManyToOne
-    @JoinColumn( name= "user_id" )
+    @JoinColumn(name = "user_id")
     @JsonBackReference
-    private User user; 
+    private User user;
     @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Product> products;
+
+    public void addProduct(Product product) {
+        if (product == null) return;
+
+        if (!products.contains(product)) {
+            products.add(product);
+        }
+
+        product.setShoppingList(this);
+    }
+
+
+    public void removeProduct(Product product) {
+        if (product == null) return;
+
+        products.remove(product);
+        product.setShoppingList(null);
+    }
 }

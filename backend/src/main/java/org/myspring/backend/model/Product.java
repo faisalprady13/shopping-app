@@ -5,38 +5,41 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UuidGenerator;
-import org.myspring.backend.dto.ProductDto;
-
-import java.util.UUID;
+import lombok.Setter;
+import org.myspring.backend.dto.ProductDTO;
 
 @Entity
 @Table(name = "Products")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class Product {
     @Id
-    @UuidGenerator
-    private UUID id;
+    private String id;
     private String name;
     private int quantity;
     private ProductStatus status;
     @ManyToOne
-    @JoinColumn( name= "list_id" )
+    @JoinColumn(name = "list_id")
     @JsonBackReference
     private ShoppingList shoppingList;
 
 
-    public Product(ProductDto productDto) {
-        this(null, productDto.name(), productDto.quantity(), productDto.status(), null);
+    public Product(String id, ProductDTO productDto) {
+        this(id, productDto.name(), productDto.quantity(), productDto.status(), null);
     }
 
 
-    public Product(ProductDto newProductDto, Product oldProduct) {
-        String name = !newProductDto.name().isEmpty() ? newProductDto.name() : oldProduct.getName();
-        int quantity = newProductDto.quantity() != null && newProductDto.quantity() > 0 ? newProductDto.quantity() : oldProduct.getQuantity();
-        ProductStatus status = newProductDto.status() != null ? newProductDto.status() : oldProduct.getStatus();
-        this(oldProduct.getId(), name, quantity, status, oldProduct.getShoppingList());
+    public Product(ProductDTO newProductDTO, Product oldProduct) {
+        String name = !newProductDTO.name().isEmpty() ? newProductDTO.name() : oldProduct.name;
+        int quantity = newProductDTO.quantity() != null && newProductDTO.quantity() > 0 ? newProductDTO.quantity() : oldProduct.quantity;
+        ProductStatus status = newProductDTO.status() != null ? newProductDTO.status() : oldProduct.status;
+        this(oldProduct.id, name, quantity, status, oldProduct.shoppingList);
+    }
+
+    public void update(ProductDTO productDto) {
+        this.name = productDto.name() != null ? productDto.name() : this.name;
+        this.quantity = productDto.quantity() != null && productDto.quantity() > 0 ? productDto.quantity() : this.quantity;
+        this.status = productDto.status() != null ? productDto.status() : this.status;
     }
 }

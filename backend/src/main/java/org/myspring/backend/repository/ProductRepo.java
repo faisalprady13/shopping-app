@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ProductRepo extends JpaRepository<Product, UUID> {
+public interface ProductRepo extends JpaRepository<Product, String> {
     List<Product> findProductsByShoppingList_Id(String id);
 
-    Product findProductById(UUID id);
+    Product findProductById(String id);
 }
