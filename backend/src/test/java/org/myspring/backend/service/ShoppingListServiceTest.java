@@ -13,7 +13,6 @@ import org.myspring.backend.repository.ListRepo;
 import org.junit.jupiter.api.Test;
 import org.myspring.backend.repository.ProductRepo;
 import org.myspring.backend.repository.UserRepo;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -316,5 +315,39 @@ class ShoppingListServiceTest {
         assertThatExceptionOfType(ProductNotFound.class)
                 .isThrownBy(() -> service.updateProductInShoppingList(productDto))
                 .withMessage("Product 99 not found in shopping list 1");
+    }
+
+    @Test
+    void getListsByUserId_shouldReturnListOfShoppingList_whenUserInDatabase() throws UserIdNotFound {
+        ListRepo mockListRepo = mock(ListRepo.class);
+        IdService mockingIdService = mock(IdService.class);
+        UserRepo mockUserRepo = mock(UserRepo.class);
+        ProductRepo mockProductRepo = mock(ProductRepo.class);
+        ShoppingListService service = new ShoppingListService(mockListRepo, mockingIdService, mockUserRepo, mockProductRepo);
+        String userId= "6";
+        Instant date = Instant.now();
+        User user = new User(userId, "Max", null);
+        ShoppingList shoppingList = new ShoppingList("1", "Test",
+                date, user, null);
+        List<ShoppingList> expected = new ArrayList<>(List.of(shoppingList));
+        List<ShoppingList> actual;
+
+        when(mockListRepo.findShoppingListsByUser_Id(userId)).thenReturn(expected);
+        actual = service.getListsByUserId(userId);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getListsByUserId_shouldThrowException_whenUserNotDatabase(){
+        ListRepo mockListRepo = mock(ListRepo.class);
+        IdService mockingIdService = mock(IdService.class);
+        UserRepo mockUserRepo = mock(UserRepo.class);
+        ProductRepo mockProductRepo = mock(ProductRepo.class);
+        ShoppingListService service = new ShoppingListService(mockListRepo, mockingIdService, mockUserRepo, mockProductRepo);
+        String userId= "0";
+
+        assertThatExceptionOfType(UserIdNotFound.class)
+                .isThrownBy(() -> service.getListsByUserId(userId))
+                .withMessage("User with id 0 not found!");
     }
 }

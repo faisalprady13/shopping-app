@@ -32,7 +32,7 @@ public class ShoppingListController {
     }
 
     @GetMapping("/all/{id}")
-    public List<ShoppingList> getListsByUserId(@PathVariable String id) {
+    public List<ShoppingList> getListsByUserId(@PathVariable String id) throws UserIdNotFound {
         return listService.getListsByUserId(id);
     }
 

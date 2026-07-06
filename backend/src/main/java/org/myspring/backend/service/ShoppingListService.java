@@ -58,8 +58,14 @@ public class ShoppingListService {
         }
     }
 
-    public List<ShoppingList> getListsByUserId(String userId){
-        return listRepo.findShoppingListsByUser_Id(userId);
+    public List<ShoppingList> getListsByUserId(String userId) throws UserIdNotFound {
+        List<ShoppingList> lists= listRepo.findShoppingListsByUser_Id(userId);
+
+        if (lists.isEmpty()){
+            throw new UserIdNotFound("User with id " + userId + " not found!");
+        } else {
+            return lists;
+        }
     }
 
     /**
