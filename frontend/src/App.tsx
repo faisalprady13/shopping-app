@@ -8,7 +8,8 @@ import Footer from './components/Footer'
 import Header from './components/Header'
 import Listenseite from './components/Listenseite'
 import Startseite from './components/Startseite'
-import type { Screen, ShoppingItem, ShoppingList } from './types'
+import type { Screen, ShoppingItem, ShoppingList, UserDto } from './types';
+import axios from 'axios';
 
 const initialLists: ShoppingList[] = [
   {
@@ -44,12 +45,19 @@ export function App() {
   const isLoggedIn = screen !== 'start'
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+    const userDto: UserDto= {"name": username}
+
     event.preventDefault()
 
     if (username.trim() === '') {
       return
     }
 
+    axios
+      .post('/api/user', userDto)
+      .then( (response) =>
+          setUsername(response.data.name) )
+      .catch( (error_) => console.log(error_) );
     setScreen('lists')
   }
 
