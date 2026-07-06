@@ -338,16 +338,18 @@ class ShoppingListServiceTest {
     }
 
     @Test
-    void getListsByUserId_shouldThrowException_whenUserNotDatabase(){
+    void getListsByUserId_shouldReturnEmptyList_whenUserNotDatabase(){
         ListRepo mockListRepo = mock(ListRepo.class);
         IdService mockingIdService = mock(IdService.class);
         UserRepo mockUserRepo = mock(UserRepo.class);
         ProductRepo mockProductRepo = mock(ProductRepo.class);
         ShoppingListService service = new ShoppingListService(mockListRepo, mockingIdService, mockUserRepo, mockProductRepo);
         String userId= "0";
+        List<ShoppingList> expected = Collections.emptyList();
+        List<ShoppingList> actual;
 
-        assertThatExceptionOfType(UserIdNotFound.class)
-                .isThrownBy(() -> service.getListsByUserId(userId))
-                .withMessage("User with id 0 not found!");
+        when(mockListRepo.findShoppingListsByUser_Id(userId)).thenReturn(expected);
+        actual = service.getListsByUserId(userId);
+        assertEquals(expected, actual);
     }
 }

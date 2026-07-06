@@ -248,21 +248,4 @@ class ShoppingListControllerTest {
                 .andExpect(content().json(jsonList));
     }
 
-    @Test
-    void getListsByUserId_shouldThrowException_whenUserNotFound() throws Exception {
-        String userId= "0";
-        Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-        User user = new User("6", "Max", null);
-        List<Product> products = Collections.emptyList();
-        ShoppingList shoppingList = new ShoppingList("1", "Test",
-                                                        date, user, products);
-        String errorMessage= "Ein Fehler ist aufgetreten: ";
-
-        errorMessage+= "User with id " + userId + " not found!";
-        userRepo.save(user);
-        listRepo.save(shoppingList);
-        mvc.perform(get("/api/lists/all/" + userId))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(errorMessage));
-    }
 }
