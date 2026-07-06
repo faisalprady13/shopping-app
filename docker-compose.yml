@@ -4,9 +4,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      H2_DB_URI: jdbc:h2:mem:shopping;DB_CLOSE_DELAY=-1
-      H2_DB_USER: sa
-      H2_DB_PASSWD: ""
+      POSTGRES_DB_URI: ${POSTGRES_DB_URI}
+      POSTGRES_DB_USER: ${POSTGRES_DB_USER}
+      POSTGRES_DB_PASSWD: ${POSTGRES_DB_PASSWD}
 
   frontend:
     build: ./frontend
