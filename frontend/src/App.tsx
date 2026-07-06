@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useState } from 'react';
 import type { FormEvent } from 'react'
 import { createRoot } from 'react-dom/client'
 import './App.css'
@@ -8,7 +8,8 @@ import Footer from './components/Footer'
 import Header from './components/Header'
 import Listenseite from './components/Listenseite'
 import Startseite from './components/Startseite'
-import type { Screen, ShoppingItem, ShoppingList } from './types'
+import type { Screen, ShoppingItem, ShoppingList, UserDto } from './types';
+import axios from 'axios';
 
 const initialLists: ShoppingList[] = [
   {
@@ -39,18 +40,33 @@ export function App() {
   const [selectedListId, setSelectedListId] = useState(initialLists[0].id)
   const [productName, setProductName] = useState('')
   const [quantity, setQuantity] = useState('1')
+  const [errorlog, setErrorlog] = useState<string>("")
 
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+    const userDto: UserDto= {"name": username}
+
     event.preventDefault()
 
     if (username.trim() === '') {
       return
     }
 
-    setScreen('lists')
+    axios
+      .post('/api/user', userDto)
+      .then( (response) => {
+        setUsername(response.data.name);
+        setScreen('lists');
+      })
+      .catch( (error_) => {
+        if(error_.status === 502){
+          setErrorlog("Keine Verbindung zum Backend!")
+        } else {
+          console.log(error_);
+        }
+      });
   }
 
   const handleLogout = () => {
@@ -210,7 +226,7 @@ export function App() {
 
       <main className="app-content">{page}</main>
 
-      <Footer />
+      <Footer errormessage={errorlog} />
     </div>
   )
 }

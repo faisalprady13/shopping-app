@@ -35,8 +35,9 @@
 
 .app-footer {
   min-height: 56px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  place-items: flex-start;
+  flex-direction: row;
   padding: 14px 24px;
   border-top: 3px solid var(--line);
   background: var(--panel);
@@ -44,6 +45,11 @@
   font-size: 14px;
   font-weight: 800;
   text-align: center;
+}
+
+#errmes {
+  color: red;
+  margin-left: 100px;
 }
 
 .wire-panel {

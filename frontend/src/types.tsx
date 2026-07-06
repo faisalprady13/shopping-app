@@ -13,3 +13,7 @@ export type ShoppingList = {
   createdAt: string
   items: ShoppingItem[]
 }
+
+export type UserDto = {
+  name: string
+}
