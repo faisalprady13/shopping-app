@@ -58,6 +58,10 @@ public class ShoppingListService {
         }
     }
 
+    public List<ShoppingList> getListsByUserId(String userId){
+        return listRepo.findShoppingListsByUser_Id(userId);
+    }
+
     /**
      * Create a new shopping list and save it.
      *
