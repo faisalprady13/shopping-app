@@ -1,5 +1,14 @@
-const Footer = () => {
-  return <footer className="app-footer">shopping-app © All rights reserved.</footer>
+type FooterProps = {
+  errormessage: string
+}
+
+const Footer = ({errormessage}:FooterProps) => {
+  return (
+    <footer className="app-footer">
+      <div>shopping-app © All rights reserved.</div>
+      <div id="errmes">{errormessage}</div>
+    </footer>
+  );
 }
 
 export default Footer

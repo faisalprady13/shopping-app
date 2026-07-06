@@ -1,4 +1,4 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useState } from 'react';
 import type { FormEvent } from 'react'
 import { createRoot } from 'react-dom/client'
 import './App.css'
@@ -40,6 +40,7 @@ export function App() {
   const [selectedListId, setSelectedListId] = useState(initialLists[0].id)
   const [productName, setProductName] = useState('')
   const [quantity, setQuantity] = useState('1')
+  const [errorlog, setErrorlog] = useState<string>("")
 
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
@@ -55,10 +56,17 @@ export function App() {
 
     axios
       .post('/api/user', userDto)
-      .then( (response) =>
-          setUsername(response.data.name) )
-      .catch( (error_) => console.log(error_) );
-    setScreen('lists')
+      .then( (response) => {
+        setUsername(response.data.name);
+        setScreen('lists');
+      })
+      .catch( (error_) => {
+        if(error_.status === 502){
+          setErrorlog("Keine Verbindung zum Backend!")
+        } else {
+          console.log(error_);
+        }
+      });
   }
 
   const handleLogout = () => {
@@ -218,7 +226,7 @@ export function App() {
 
       <main className="app-content">{page}</main>
 
-      <Footer />
+      <Footer errormessage={errorlog} />
     </div>
   )
 }
