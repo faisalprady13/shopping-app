@@ -1,101 +1,222 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
-import heroImg from './assets/hero.png';
-import './App.css';
+import { StrictMode, useState } from 'react'
+import type { FormEvent } from 'react'
+import { createRoot } from 'react-dom/client'
+import './App.css'
+import './index.css'
+import Detailseite from './components/Detailseite'
+import Footer from './components/Footer'
+import Header from './components/Header'
+import Listenseite from './components/Listenseite'
+import Startseite from './components/Startseite'
+import type { Screen, ShoppingItem, ShoppingList } from './types'
 
-function App() {
-  const [count, setCount] = useState(0);
+const initialLists: ShoppingList[] = [
+  {
+    id: 1,
+    title: 'List 1',
+    createdAt: '29.06.2026',
+    items: [
+      { id: 1, name: 'Milch', quantity: '1', completed: false },
+      { id: 2, name: 'Brot', quantity: '2', completed: true },
+      { id: 3, name: 'Aepfel', quantity: '6', completed: false },
+    ],
+  },
+  {
+    id: 2,
+    title: 'List 2',
+    createdAt: '28.06.2026',
+    items: [
+      { id: 4, name: 'Reis', quantity: '1', completed: false },
+      { id: 5, name: 'Tomaten', quantity: '4', completed: false },
+    ],
+  },
+]
+
+export function App() {
+  const [screen, setScreen] = useState<Screen>('start')
+  const [username, setUsername] = useState('')
+  const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>(initialLists)
+  const [selectedListId, setSelectedListId] = useState(initialLists[0].id)
+  const [productName, setProductName] = useState('')
+  const [quantity, setQuantity] = useState('1')
+
+  const selectedList = shoppingLists.find((list) => list.id === selectedListId)
+  const isLoggedIn = screen !== 'start'
+
+  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (username.trim() === '') {
+      return
+    }
+
+    setScreen('lists')
+  }
+
+  const handleLogout = () => {
+    setUsername('')
+    setScreen('start')
+  }
+
+  const handleAddList = () => {
+    const nextNumber = shoppingLists.length + 1
+    const today = new Intl.DateTimeFormat('de-DE').format(new Date())
+
+    const newList: ShoppingList = {
+      id: Date.now(),
+      title: `List ${nextNumber}`,
+      createdAt: today,
+      items: [],
+    }
+
+    const updatedLists = [newList, ...shoppingLists]
+
+    setShoppingLists(updatedLists)
+    setSelectedListId(newList.id)
+    setScreen('details')
+  }
+
+  const handleOpenList = (listId: number) => {
+    setSelectedListId(listId)
+    setScreen('details')
+  }
+
+  const handleAddItem = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const trimmedName = productName.trim()
+    const trimmedQuantity = quantity.trim()
+
+    if (trimmedName === '' || !selectedList) {
+      return
+    }
+
+    const newItem: ShoppingItem = {
+      id: Date.now(),
+      name: trimmedName,
+      quantity: trimmedQuantity || '1',
+      completed: false,
+    }
+
+    const updatedLists = shoppingLists.map((list) => {
+      if (list.id !== selectedList.id) {
+        return list
+      }
+
+      return {
+        ...list,
+        items: [...list.items, newItem],
+      }
+    })
+
+    setShoppingLists(updatedLists)
+    setProductName('')
+    setQuantity('1')
+  }
+
+  const handleToggleItem = (itemId: number) => {
+    if (!selectedList) {
+      return
+    }
+
+    const updatedLists = shoppingLists.map((list) => {
+      if (list.id !== selectedList.id) {
+        return list
+      }
+
+      const updatedItems = list.items.map((item) => {
+        if (item.id !== itemId) {
+          return item
+        }
+
+        return {
+          ...item,
+          completed: !item.completed,
+        }
+      })
+
+      return {
+        ...list,
+        items: updatedItems,
+      }
+    })
+
+    setShoppingLists(updatedLists)
+  }
+
+  const handleDeleteItem = (itemId: number) => {
+    if (!selectedList) {
+      return
+    }
+
+    const updatedLists = shoppingLists.map((list) => {
+      if (list.id !== selectedList.id) {
+        return list
+      }
+
+      const remainingItems = list.items.filter((item) => item.id !== itemId)
+
+      return {
+        ...list,
+        items: remainingItems,
+      }
+    })
+
+    setShoppingLists(updatedLists)
+  }
+
+  const handleDeleteList = (listId: number) => {
+    const remainingLists = shoppingLists.filter((list) => list.id !== listId)
+
+    if (selectedListId === listId && remainingLists.length > 0) {
+      setSelectedListId(remainingLists[0].id)
+    }
+
+    setShoppingLists(remainingLists)
+  }
+
+  let page = <Startseite username={username} onUsernameChange={setUsername} onLogin={handleLogin} />
+
+  if (screen === 'lists') {
+    page = (
+      <Listenseite
+        lists={shoppingLists}
+        onAddList={handleAddList}
+        onOpenList={handleOpenList}
+        onDeleteList={handleDeleteList}
+      />
+    )
+  }
+
+  if (screen === 'details' && selectedList) {
+    page = (
+      <Detailseite
+        shoppingList={selectedList}
+        productName={productName}
+        quantity={quantity}
+        onProductNameChange={setProductName}
+        onQuantityChange={setQuantity}
+        onBack={() => setScreen('lists')}
+        onAddItem={handleAddItem}
+        onToggleItem={handleToggleItem}
+        onDeleteItem={handleDeleteItem}
+      />
+    )
+  }
+
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button type="button" className="counter" onClick={() => setCount((count) => count + 1)}>
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-shell">
+      <Header username={username} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
 
-      <div className="ticks"></div>
+      <main className="app-content">{page}</main>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  );
+      <Footer />
+    </div>
+  )
 }
 
-export default App;
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
