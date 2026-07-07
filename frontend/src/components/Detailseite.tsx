@@ -8,9 +8,9 @@ type DetailseiteProps = {
   onProductNameChange: (productName: string) => void
   onQuantityChange: (quantity: string) => void
   onBack: () => void
-  onAddItem: (event: FormEvent<HTMLFormElement>) => void
-  onToggleItem: (itemId: number) => void
-  onDeleteItem: (itemId: number) => void
+  onAddItem: (event: FormEvent<HTMLFormElement>) =>Promise<void>
+  onToggleItem: (itemId: string) => void
+  onDeleteItem: (itemId: string) => void
 }
 
 const Detailseite = ({

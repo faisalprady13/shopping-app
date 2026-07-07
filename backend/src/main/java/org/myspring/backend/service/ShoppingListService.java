@@ -59,7 +59,8 @@ public class ShoppingListService {
     }
 
     /**
-     *  Searches for all of a user's shopping lists.
+     * Searches for all of a user's shopping lists.
+     *
      * @param userId to search for
      * @return found Lists
      */
@@ -94,7 +95,7 @@ public class ShoppingListService {
         }
     }
 
-    public ShoppingList addProductToShoppingList(ProductDTO productDto) throws ListIdNotFound {
+    public Product addProductToShoppingList(ProductDTO productDto) throws ListIdNotFound {
         String shoppingListId = productDto.shoppingListId();
         ShoppingList shoppingList = getListById(shoppingListId);
 
@@ -107,12 +108,16 @@ public class ShoppingListService {
         listRepo.save(shoppingList);
         productRepo.save(newProduct);
 
-        return shoppingList;
+        return newProduct;
     }
 
-    public ShoppingList removeProductFromShoppingList(ProductDTO productDto) throws ListIdNotFound {
-        ShoppingList shoppingList = getListById(productDto.shoppingListId());
-        shoppingList.removeProduct(productRepo.findById(productDto.id()).orElseThrow());
+    public ShoppingList removeProductFromShoppingList(String productId) throws ListIdNotFound, ProductNotFound {
+        Product product = productRepo.findById(productId).orElseThrow(() -> new ProductNotFound(
+                "Product " + productId + " not found in shopping list"
+        ));
+
+        ShoppingList shoppingList = getListById(product.getShoppingList().getId());
+        shoppingList.removeProduct(productRepo.findById(productId).orElseThrow());
         listRepo.save(shoppingList);
         return shoppingList;
     }

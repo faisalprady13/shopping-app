@@ -1,14 +1,14 @@
 export type Screen = 'start' | 'lists' | 'details'
 
 export type ShoppingItem = {
-  id: number;
+  id: string;
   name: string;
   quantity: string;
   status: boolean;
 };
 
 export type ShoppingList = {
-  id: number;
+  id: string;
   name: string;
   date: string;
   products: ShoppingItem[];
