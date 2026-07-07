@@ -14,21 +14,21 @@ import axios from 'axios';
 const initialLists: ShoppingList[] = [
   {
     id: 1,
-    title: 'List 1',
-    createdAt: '29.06.2026',
-    items: [
-      { id: 1, name: 'Milch', quantity: '1', completed: false },
-      { id: 2, name: 'Brot', quantity: '2', completed: true },
-      { id: 3, name: 'Aepfel', quantity: '6', completed: false },
+    name: 'List 1',
+    date: '29.06.2026',
+    products: [
+      { id: 1, name: 'Milch', quantity: '1', status: false },
+      { id: 2, name: 'Brot', quantity: '2', status: true },
+      { id: 3, name: 'Aepfel', quantity: '6', status: false },
     ],
   },
   {
     id: 2,
-    title: 'List 2',
-    createdAt: '28.06.2026',
-    items: [
-      { id: 4, name: 'Reis', quantity: '1', completed: false },
-      { id: 5, name: 'Tomaten', quantity: '4', completed: false },
+    name: 'List 2',
+    date: '28.06.2026',
+    products: [
+      { id: 4, name: 'Reis', quantity: '1', status: false },
+      { id: 5, name: 'Tomaten', quantity: '4', status: false },
     ],
   },
 ]
@@ -45,6 +45,14 @@ export function App() {
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
 
+  function loadAllLists (usrId: string){
+    axios.get<ShoppingList[]>("/api/lists/all/" + usrId)
+         .then( (response) =>
+            setShoppingLists(response.data)
+         )
+         .catch( (error_) => setErrorlog(error_) );
+  }
+
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     const userDto: UserDto= {"name": username}
 
@@ -58,6 +66,7 @@ export function App() {
       .post('/api/user', userDto)
       .then( (response) => {
         setUsername(response.data.name);
+        loadAllLists(response.data.id);
         setScreen('lists');
       })
       .catch( (error_) => {
@@ -80,9 +89,9 @@ export function App() {
 
     const newList: ShoppingList = {
       id: Date.now(),
-      title: `List ${nextNumber}`,
-      createdAt: today,
-      items: [],
+      name: `List ${nextNumber}`,
+      date: today,
+      products: [],
     }
 
     const updatedLists = [newList, ...shoppingLists]
@@ -111,7 +120,7 @@ export function App() {
       id: Date.now(),
       name: trimmedName,
       quantity: trimmedQuantity || '1',
-      completed: false,
+      status: false,
     }
 
     const updatedLists = shoppingLists.map((list) => {
@@ -121,7 +130,7 @@ export function App() {
 
       return {
         ...list,
-        items: [...list.items, newItem],
+        products: [...list.products, newItem],
       }
     })
 
@@ -140,20 +149,20 @@ export function App() {
         return list
       }
 
-      const updatedItems = list.items.map((item) => {
+      const updatedItems = list.products.map((item) => {
         if (item.id !== itemId) {
           return item
         }
 
         return {
           ...item,
-          completed: !item.completed,
+          status: !item.status,
         }
       })
 
       return {
         ...list,
-        items: updatedItems,
+        products: updatedItems,
       }
     })
 
@@ -170,11 +179,11 @@ export function App() {
         return list
       }
 
-      const remainingItems = list.items.filter((item) => item.id !== itemId)
+      const remainingItems = list.products.filter((item) => item.id !== itemId)
 
       return {
         ...list,
-        items: remainingItems,
+        products: remainingItems,
       }
     })
 

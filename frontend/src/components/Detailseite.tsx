@@ -32,23 +32,23 @@ const Detailseite = ({
       </header>
 
       <div className="details-list-row">
-        <strong>{shoppingList.title}</strong>
+        <strong>{shoppingList.name}</strong>
         <button type="button" onClick={onBack}>
           back
         </button>
       </div>
 
       <div className="details-content">
-        <ul className="items-list" aria-label={`${shoppingList.title} Produkte`}>
-          {shoppingList.items.map((item) => (
-            <li className={item.completed ? 'completed' : ''} key={item.id}>
+        <ul className="items-list" aria-label={`${shoppingList.name} Produkte`}>
+          {shoppingList.products.map((item) => (
+            <li className={item.status ? 'completed' : ''} key={item.id}>
               <button
                 className="check-button"
                 type="button"
                 aria-label={`${item.name} als erledigt markieren`}
                 onClick={() => onToggleItem(item.id)}
               >
-                {item.completed ? '✓' : ''}
+                {item.status ? '✓' : ''}
               </button>
               <span>
                 <strong>{item.name}</strong>
