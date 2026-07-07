@@ -86,25 +86,8 @@ export function App() {
   }
 
   const handleAddList = () => {
+    setListName("NEW")
     setScreen('add')
-  }
-
-  const handleAddListOld = () => {
-    const nextNumber = shoppingLists.length + 1;
-    const today = new Intl.DateTimeFormat('de-DE').format(new Date());
-
-    const newList: ShoppingList = {
-      id: Date.now(),
-      name: `List ${nextNumber}`,
-      date: today,
-      products: [],
-    };
-
-    const updatedLists = [newList, ...shoppingLists];
-
-    setShoppingLists(updatedLists);
-    setSelectedListId(newList.id);
-    setScreen('details');
   }
 
   const onHandleSubmittedList = (shopListName: string) => {
@@ -256,12 +239,12 @@ export function App() {
 
   if (screen === 'add'){
     page = (
-        <AddListSeite
-            listName={listName}
-            onListNameChange={setListName}
-            submitList={onHandleSubmittedList}
-        />
-    )
+      <AddListSeite
+        listName={listName}
+        onBack={() => setScreen('lists')}
+        submitList={onHandleSubmittedList}
+      />
+    );
   }
 
   return (
