@@ -46,9 +46,6 @@ export function App() {
   const isLoggedIn = screen !== 'start'
 
   function loadAllLists (usrId: string){
-    if (!usrId || !/^[a-zA-Z0-9_-]+$/.test(String(usrId))) {
-      throw new Error("Invalid user id");
-    }
     axios.get<ShoppingList[]>("/api/lists/all/" + usrId)
          .then( (response) =>
             setShoppingLists(response.data)
