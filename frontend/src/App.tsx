@@ -26,9 +26,6 @@ const initialLists: ShoppingList[] = [
     name: 'List 1',
     date: '29.06.2026',
     products: [
-      { id: 1, name: 'Milch', quantity: '1', status: false },
-      { id: 2, name: 'Brot', quantity: '2', status: true },
-      { id: 3, name: 'Aepfel', quantity: '6', status: false },
     ],
   },
   {
@@ -36,8 +33,6 @@ const initialLists: ShoppingList[] = [
     name: 'List 2',
     date: '28.06.2026',
     products: [
-      { id: 4, name: 'Reis', quantity: '1', status: false },
-      { id: 5, name: 'Tomaten', quantity: '4', status: false },
     ],
   },
 ]
@@ -158,13 +153,16 @@ export function App() {
       if (list.id !== selectedList.id) {
         return list
       }
+      setprocessingList({
+        ...list,
+        products: [...list.products, newItem],
+      })
 
       return {
         ...list,
         products: [...list.products, newItem],
       }
     })
-    console.log(updatedLists)
     setShoppingLists(updatedLists)
     setProductName('')
     setQuantity('1')
@@ -195,12 +193,17 @@ export function App() {
         return updatedItem;
       })
 
+      setprocessingList({
+        ...list,
+        products: updatedItems,
+      })
+
       return {
         ...list,
         products: updatedItems,
       }
     })
-
+    console.log(updatedLists)
     setShoppingLists(updatedLists)
   }
 
@@ -216,6 +219,10 @@ export function App() {
 
       const remainingItems = list.products.filter((item) => item.id !== itemId)
 
+      setprocessingList({
+        ...list,
+        products: remainingItems,
+      })
       return {
         ...list,
         products: remainingItems,
