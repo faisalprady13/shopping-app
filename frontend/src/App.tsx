@@ -26,9 +26,6 @@ const initialLists: ShoppingList[] = [
     name: 'List 1',
     date: '29.06.2026',
     products: [
-      { id: 1, name: 'Milch', quantity: '1', status: false },
-      { id: 2, name: 'Brot', quantity: '2', status: true },
-      { id: 3, name: 'Aepfel', quantity: '6', status: false },
     ],
   },
   {
@@ -36,8 +33,6 @@ const initialLists: ShoppingList[] = [
     name: 'List 2',
     date: '28.06.2026',
     products: [
-      { id: 4, name: 'Reis', quantity: '1', status: false },
-      { id: 5, name: 'Tomaten', quantity: '4', status: false },
     ],
   },
 ]
