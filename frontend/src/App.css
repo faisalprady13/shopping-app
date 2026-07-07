@@ -258,6 +258,10 @@ button:focus-visible {
   border: 3px solid var(--line);
   border-radius: 20px;
 }
+.completedList{
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
 
 .items-list li.completed strong {
   text-decoration: line-through;

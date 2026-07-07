@@ -18,7 +18,7 @@ const AddListSeite=({
   submitList,
   onError
 }:AddListSeiteProps) => {
-  const { register, handleSubmit, formState: {  isValid }, } =
+  const { register, handleSubmit, formState: { errors, isValid }, } =
     useForm<FormValues>({ mode: 'onChange' });
 
   useEffect(() => {
