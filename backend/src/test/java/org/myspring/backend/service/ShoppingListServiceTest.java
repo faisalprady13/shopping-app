@@ -13,6 +13,7 @@ import org.myspring.backend.repository.ListRepo;
 import org.junit.jupiter.api.Test;
 import org.myspring.backend.repository.ProductRepo;
 import org.myspring.backend.repository.UserRepo;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -154,14 +155,12 @@ class ShoppingListServiceTest {
         ShoppingList shoppingList = new ShoppingList(listId, "Test",
                 Instant.now().truncatedTo(ChronoUnit.SECONDS), user, new ArrayList<>());
         ProductDTO productDto = new ProductDTO(null, "Milk", 2, ProductStatus.OPEN, listId);
-        ShoppingList actual;
 
         when(mockListRepo.findById(listId)).thenReturn(Optional.of(shoppingList));
         when(mockingIdService.generateId()).thenReturn(productId);
-        actual = service.addProductToShoppingList(productDto);
 
-        assertEquals(1, actual.getProducts().size());
-        Product addedProduct = actual.getProducts().get(0);
+        Product addedProduct = service.addProductToShoppingList(productDto);
+
         assertEquals(productId, addedProduct.getId());
         assertEquals("Milk", addedProduct.getName());
         assertEquals(2, addedProduct.getQuantity());
@@ -188,7 +187,7 @@ class ShoppingListServiceTest {
     }
 
     @Test
-    void removeProductFromShoppingList_shouldRemoveProduct_whenFound() throws ListIdNotFound {
+    void removeProductFromShoppingList_shouldRemoveProduct_whenFound() throws ListIdNotFound, ProductNotFound {
         ListRepo mockListRepo = mock(ListRepo.class);
         IdService mockingIdService = mock(IdService.class);
         UserRepo mockUserRepo = mock(UserRepo.class);
@@ -203,12 +202,11 @@ class ShoppingListServiceTest {
         ShoppingList shoppingList = new ShoppingList(listId, "Test",
                 Instant.now().truncatedTo(ChronoUnit.SECONDS), user, products);
         product.setShoppingList(shoppingList);
-        ProductDTO productDto = new ProductDTO(productId, null, null, null, listId);
         ShoppingList actual;
 
         when(mockListRepo.findById(listId)).thenReturn(Optional.of(shoppingList));
         when(mockProductRepo.findById(productId)).thenReturn(Optional.of(product));
-        actual = service.removeProductFromShoppingList(productDto);
+        actual = service.removeProductFromShoppingList(productId);
 
         assertTrue(actual.getProducts().isEmpty());
         assertNull(product.getShoppingList());
@@ -223,12 +221,10 @@ class ShoppingListServiceTest {
         ProductRepo mockProductRepo = mock(ProductRepo.class);
         ShoppingListService service = new ShoppingListService(mockListRepo, mockingIdService, mockUserRepo, mockProductRepo);
 
-        String listId = "0";
-        ProductDTO productDto = new ProductDTO("10", null, null, null, listId);
 
-        assertThatExceptionOfType(ListIdNotFound.class)
-                .isThrownBy(() -> service.removeProductFromShoppingList(productDto))
-                .withMessage("List with id 0 not found!");
+        assertThatExceptionOfType(ProductNotFound.class)
+                .isThrownBy(() -> service.removeProductFromShoppingList("10"))
+                .withMessage("Product 10 not found in shopping list");
     }
 
     @Test
@@ -243,13 +239,12 @@ class ShoppingListServiceTest {
         User user = new User("6", "Max", null);
         ShoppingList shoppingList = new ShoppingList(listId, "Test",
                 Instant.now().truncatedTo(ChronoUnit.SECONDS), user, new ArrayList<>());
-        ProductDTO productDto = new ProductDTO("99", null, null, null, listId);
 
         when(mockListRepo.findById(listId)).thenReturn(Optional.of(shoppingList));
         when(mockProductRepo.findById("99")).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> service.removeProductFromShoppingList(productDto));
+        assertThatExceptionOfType(ProductNotFound.class)
+                .isThrownBy(() -> service.removeProductFromShoppingList("99"));
     }
 
     @Test
@@ -324,7 +319,7 @@ class ShoppingListServiceTest {
         UserRepo mockUserRepo = mock(UserRepo.class);
         ProductRepo mockProductRepo = mock(ProductRepo.class);
         ShoppingListService service = new ShoppingListService(mockListRepo, mockingIdService, mockUserRepo, mockProductRepo);
-        String userId= "6";
+        String userId = "6";
         Instant date = Instant.now();
         User user = new User(userId, "Max", null);
         ShoppingList shoppingList = new ShoppingList("1", "Test",
@@ -338,13 +333,13 @@ class ShoppingListServiceTest {
     }
 
     @Test
-    void getListsByUserId_shouldReturnEmptyList_whenUserNotDatabase(){
+    void getListsByUserId_shouldReturnEmptyList_whenUserNotDatabase() {
         ListRepo mockListRepo = mock(ListRepo.class);
         IdService mockingIdService = mock(IdService.class);
         UserRepo mockUserRepo = mock(UserRepo.class);
         ProductRepo mockProductRepo = mock(ProductRepo.class);
         ShoppingListService service = new ShoppingListService(mockListRepo, mockingIdService, mockUserRepo, mockProductRepo);
-        String userId= "0";
+        String userId = "0";
         List<ShoppingList> expected = Collections.emptyList();
         List<ShoppingList> actual;
 

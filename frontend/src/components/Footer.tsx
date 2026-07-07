@@ -3,7 +3,7 @@ type FooterProps = {
 }
 
 const Footer = ({errormessage}:FooterProps) => {
-  return (
+    return (
     <footer className="app-footer">
       <div>shopping-app © All rights reserved.</div>
       <div id="errmes">{errormessage}</div>
