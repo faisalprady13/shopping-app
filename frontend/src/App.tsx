@@ -1,6 +1,6 @@
-import { StrictMode, useState } from 'react';
-import type { FormEvent } from 'react'
-import { createRoot } from 'react-dom/client'
+import type {FormEvent} from 'react'
+import {StrictMode, useState} from 'react';
+import {createRoot} from 'react-dom/client'
 import './App.css'
 import './index.css'
 import Detailseite from './components/Detailseite'
@@ -8,37 +8,24 @@ import Footer from './components/Footer'
 import Header from './components/Header'
 import Listenseite from './components/Listenseite'
 import Startseite from './components/Startseite'
-import type { Screen, ShoppingItem, ShoppingList, ShoppingListDto, User, UserDto } from './types';
+import {
+  type Screen,
+  type ShoppingItem,
+  type ShoppingList,
+  type ShoppingListDto,
+  Status,
+  type User,
+  type UserDto
+} from './types';
 import axios from 'axios';
 import AddListSeite from "./components/AddListSeite.tsx";
 
-const initialLists: ShoppingList[] = [
-  {
-    id: 1,
-    name: 'List 1',
-    date: '29.06.2026',
-    products: [
-      { id: 1, name: 'Milch', quantity: '1', status: false },
-      { id: 2, name: 'Brot', quantity: '2', status: true },
-      { id: 3, name: 'Aepfel', quantity: '6', status: false },
-    ],
-  },
-  {
-    id: 2,
-    name: 'List 2',
-    date: '28.06.2026',
-    products: [
-      { id: 4, name: 'Reis', quantity: '1', status: false },
-      { id: 5, name: 'Tomaten', quantity: '4', status: false },
-    ],
-  },
-]
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('start')
   const [username, setUsername] = useState('')
-  const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>(initialLists)
-  const [selectedListId, setSelectedListId] = useState(initialLists[0].id)
+  const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([])
+  const [selectedListId, setSelectedListId] = useState<string|null>(null)
   const [productName, setProductName] = useState('')
   const [quantity, setQuantity] = useState('1')
   const [errorlog, setErrorlog] = useState<string>("")
@@ -49,10 +36,14 @@ export function App() {
   const isLoggedIn = screen !== 'start'
 
   function loadAllLists (usrId: string){
-    axios
-      .get<ShoppingList[]>('/api/lists/all/' + usrId)
-      .then((response) => setShoppingLists(response.data))
-      .catch((error_) => setErrorlog(error_));
+    axios.get<ShoppingList[]>("/api/lists/all/" + usrId)
+         .then( (response) => {
+           if(response.data) {
+              setShoppingLists(response.data)
+              }
+             }
+         )
+         .catch( (e) => setErrorlog(e.message) );
   }
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
@@ -109,12 +100,12 @@ export function App() {
           .catch((error_) => setErrorlog(error_));
   }
 
-  const handleOpenList = (listId: number) => {
+  const handleOpenList = (listId: string) => {
     setSelectedListId(listId)
     setScreen('details')
   }
 
-  const handleAddItem = (event: FormEvent<HTMLFormElement>) => {
+  const handleAddItem =async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const trimmedName = productName.trim()
@@ -124,12 +115,13 @@ export function App() {
       return
     }
 
-    const newItem: ShoppingItem = {
-      id: Date.now(),
-      name: trimmedName,
-      quantity: trimmedQuantity || '1',
-      status: false,
-    }
+    const newItem: ShoppingItem =
+        (await axios.post("/api/lists/add-product", {
+          name: trimmedName,
+          quantity: trimmedQuantity || '1',
+          status: Status.OPEN,
+          shoppingListId: selectedList.id
+        })).data;
 
     const updatedLists = shoppingLists.map((list) => {
       if (list.id !== selectedList.id) {
@@ -141,16 +133,19 @@ export function App() {
         products: [...list.products, newItem],
       }
     })
-
+    console.log(updatedLists)
     setShoppingLists(updatedLists)
     setProductName('')
     setQuantity('1')
+
   }
 
-  const handleToggleItem = (itemId: number) => {
+  const handleToggleItem = (itemId: string) => {
     if (!selectedList) {
       return
     }
+
+    let updatedItem: ShoppingItem;
 
     const updatedLists = shoppingLists.map((list) => {
       if (list.id !== selectedList.id) {
@@ -161,11 +156,12 @@ export function App() {
         if (item.id !== itemId) {
           return item
         }
-
-        return {
+        updatedItem={
           ...item,
-          status: !item.status,
+          status: item.status===Status.OPEN?Status.CLOSED:Status.OPEN,
         }
+        axios.put("/api/lists/update-product", {...updatedItem,shoppingListId:selectedList.id})
+        return updatedItem;
       })
 
       return {
@@ -177,7 +173,7 @@ export function App() {
     setShoppingLists(updatedLists)
   }
 
-  const handleDeleteItem = (itemId: number) => {
+  const handleDeleteItem = (itemId: string) => {
     if (!selectedList) {
       return
     }
@@ -196,9 +192,10 @@ export function App() {
     })
 
     setShoppingLists(updatedLists)
+    axios.delete(`/api/lists/remove-product/${itemId}`)
   }
 
-  const handleDeleteList = (listId: number) => {
+  const handleDeleteList = (listId: string) => {
     const remainingLists = shoppingLists.filter((list) => list.id !== listId)
 
     if (selectedListId === listId && remainingLists.length > 0) {

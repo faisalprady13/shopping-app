@@ -115,7 +115,7 @@ class ShoppingListControllerTest {
     }
 
     @Test
-    void addProduct_shouldReturnShoppingListWithProduct_whenAdded() throws Exception {
+    void addProduct_shouldReturnProduct_whenAdded() throws Exception {
         String listId = "1";
         Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         User user = new User("6", "Max", null);
@@ -130,10 +130,10 @@ class ShoppingListControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.products[0].name").value("Milk"))
-                .andExpect(jsonPath("$.products[0].quantity").value(2))
-                .andExpect(jsonPath("$.products[0].status").value("OPEN"))
-                .andExpect(jsonPath("$.products[0].id").isNotEmpty());
+                .andExpect(jsonPath("$.name").value("Milk"))
+                .andExpect(jsonPath("$.quantity").value(2))
+                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.id").isNotEmpty());
     }
 
     @Test
@@ -209,35 +209,26 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(delete("/api/lists/remove-product")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(productDto)))
+        mvc.perform(delete("/api/lists/remove-product/" + productId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.products").isEmpty());
     }
 
     @Test
-    void removeProduct_shouldThrowException_whenListNotFound() throws Exception {
-        String listId = "0";
-        String errorMessage = "Die Einkaufsliste wurde nicht gefunden: List with id 0 not found!";
-        ProductDTO productDto = new ProductDTO("10", null, null, null, listId);
-        ObjectMapper mapper = new ObjectMapper();
+    void removeProduct_shouldThrowException_whenProductNotFound() throws Exception {
 
-        mvc.perform(delete("/api/lists/remove-product")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(productDto)))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(errorMessage));
+        mvc.perform(delete("/api/lists/remove-product/10"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void getListsByUserId_shouldReturnJsonList_whenUserFound() throws Exception {
-        String userId= "6";
+        String userId = "6";
         Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         User user = new User(userId, "Max", null);
         List<Product> products = Collections.emptyList();
         ShoppingList shoppingList = new ShoppingList("1", "Test",
-                                                        date, user, products);
+                date, user, products);
         ObjectMapper mapper = new ObjectMapper();
         String jsonList = "[" + mapper.writeValueAsString(shoppingList) + "]";
 
