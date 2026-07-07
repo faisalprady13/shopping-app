@@ -20,6 +20,27 @@ import {
 import axios from 'axios';
 import AddListSeite from "./components/AddListSeite.tsx";
 
+const initialLists: ShoppingList[] = [
+  {
+    id: '1',
+    name: 'List 1',
+    date: '29.06.2026',
+    products: [
+      { id: 1, name: 'Milch', quantity: '1', status: false },
+      { id: 2, name: 'Brot', quantity: '2', status: true },
+      { id: 3, name: 'Aepfel', quantity: '6', status: false },
+    ],
+  },
+  {
+    id: '2',
+    name: 'List 2',
+    date: '28.06.2026',
+    products: [
+      { id: 4, name: 'Reis', quantity: '1', status: false },
+      { id: 5, name: 'Tomaten', quantity: '4', status: false },
+    ],
+  },
+]
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('start')
@@ -31,6 +52,7 @@ export function App() {
   const [errorlog, setErrorlog] = useState<string>("")
   const [listName, setListName] = useState<string>("")
   const [userId, setUserId] = useState<string>("")
+  const [processingList, setprocessingList] = useState<ShoppingList>(initialLists[0]);
 
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
@@ -44,6 +66,10 @@ export function App() {
              }
          )
          .catch( (e) => setErrorlog(e.message) );
+  }
+
+  const handleError = (errmes: string) => {
+    setErrorlog(errmes)
   }
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
@@ -97,12 +123,17 @@ export function App() {
             setSelectedListId(newList.id);
             setScreen('lists');
           })
-          .catch((error_) => setErrorlog(error_));
+          .catch( (error_) => setErrorlog(error_) );
   }
 
   const handleOpenList = (listId: string) => {
-    setSelectedListId(listId)
-    setScreen('details')
+    axios.get("api/lists/" + listId)
+          .then( (response) => {
+            setprocessingList(response.data)
+            setSelectedListId(listId);
+            setScreen('details');
+          })
+          .catch( (error_) => setErrorlog(error_) );
   }
 
   const handleAddItem =async (event: FormEvent<HTMLFormElement>) => {
@@ -221,7 +252,7 @@ export function App() {
   if (screen === 'details' && selectedList) {
     page = (
       <Detailseite
-        shoppingList={selectedList}
+        shoppingList={processingList}
         productName={productName}
         quantity={quantity}
         onProductNameChange={setProductName}
@@ -231,7 +262,7 @@ export function App() {
         onToggleItem={handleToggleItem}
         onDeleteItem={handleDeleteItem}
       />
-    )
+    );
   }
 
   if (screen === 'add'){
@@ -240,6 +271,7 @@ export function App() {
         listName={listName}
         onBack={() => setScreen('lists')}
         submitList={onHandleSubmittedList}
+        onError={handleError}
       />
     );
   }

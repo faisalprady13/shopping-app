@@ -34,9 +34,6 @@ const Listenseite = ({ lists, onAddList, onOpenList, onDeleteList }: Listenseite
                 </span>
                 <time>{list.date}</time>
               </button>
-              <button className="delete-button" type="button" onClick={() => onDeleteList(list.id)}>
-                del
-              </button>
             </div>
           )
         })}
