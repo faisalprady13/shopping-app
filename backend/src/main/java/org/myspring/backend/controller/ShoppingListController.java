@@ -31,6 +31,11 @@ public class ShoppingListController {
         return listService.getListById(id);
     }
 
+    @GetMapping("/all/{id}")
+    public List<ShoppingList> getListsByUserId(@PathVariable String id) throws UserIdNotFound {
+        return listService.getListsByUserId(id);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ShoppingList createList(@RequestBody ShoppingListDTO shopList) throws UserIdNotFound {

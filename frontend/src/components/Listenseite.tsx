@@ -2,9 +2,9 @@ import { PageHeader } from './Header'
 import type { ShoppingList } from '../types'
 
 type ListenseiteProps = {
-  lists: ShoppingList[]
-  onAddList: () => void
-  onOpenList: (listId: number) => void
+  lists: ShoppingList[],
+  onAddList: () => void,
+  onOpenList: (listId: number) => void,
   onDeleteList: (listId: number) => void
 }
 
@@ -21,18 +21,18 @@ const Listenseite = ({ lists, onAddList, onOpenList, onDeleteList }: Listenseite
 
       <div className="list-stack">
         {lists.map((list) => {
-          const completedCount = list.items.filter((item) => item.completed).length
+          const completedCount = list.products.filter((item) => item.status).length
           const status =
-            list.items.length === 0 ? 'leer' : `${completedCount} von ${list.items.length} erledigt`
+            list.products.length === 0 ? 'leer' : `${completedCount} von ${list.products.length} erledigt`
 
           return (
             <div className="shopping-list-card" key={list.id}>
               <button className="list-open-button" type="button" onClick={() => onOpenList(list.id)}>
                 <span>
-                  <strong>{list.title}</strong>
+                  <strong>{list.name}</strong>
                   <small>{status}</small>
                 </span>
-                <time>{list.createdAt}</time>
+                <time>{list.date}</time>
               </button>
               <button className="delete-button" type="button" onClick={() => onDeleteList(list.id)}>
                 del

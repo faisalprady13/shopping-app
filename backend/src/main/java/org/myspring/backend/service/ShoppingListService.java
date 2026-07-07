@@ -59,6 +59,15 @@ public class ShoppingListService {
     }
 
     /**
+     *  Searches for all of a user's shopping lists.
+     * @param userId to search for
+     * @return found Lists
+     */
+    public List<ShoppingList> getListsByUserId(String userId) {
+        return listRepo.findShoppingListsByUser_Id(userId);
+    }
+
+    /**
      * Create a new shopping list and save it.
      *
      * @param listDTO name and user for new list

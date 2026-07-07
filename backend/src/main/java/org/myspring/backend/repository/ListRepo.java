@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ListRepo extends JpaRepository<ShoppingList, String> {
     List<ShoppingList> findByUserName(String name);
+    List<ShoppingList> findShoppingListsByUser_Id(String userId);
 }
