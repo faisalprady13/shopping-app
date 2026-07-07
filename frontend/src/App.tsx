@@ -46,7 +46,7 @@ export function App() {
   const isLoggedIn = screen !== 'start'
 
   function loadAllLists (usrId: string){
-    axios.get("/api/lists/all/" + usrId)
+    axios.get<ShoppingList[]>("/api/lists/all/" + usrId)
          .then( (response) =>
             setShoppingLists(response.data)
          )
