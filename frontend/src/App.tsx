@@ -14,7 +14,7 @@ import AddListSeite from "./components/AddListSeite.tsx";
 
 const initialLists: ShoppingList[] = [
   {
-    id: 1,
+    id: '1',
     name: 'List 1',
     date: '29.06.2026',
     products: [
@@ -24,7 +24,7 @@ const initialLists: ShoppingList[] = [
     ],
   },
   {
-    id: 2,
+    id: '2',
     name: 'List 2',
     date: '28.06.2026',
     products: [
@@ -44,6 +44,7 @@ export function App() {
   const [errorlog, setErrorlog] = useState<string>("")
   const [listName, setListName] = useState<string>("")
   const [userId, setUserId] = useState<string>("")
+  const [processingList, setprocessingList] = useState<ShoppingList>(initialLists[0]);
 
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
@@ -53,6 +54,10 @@ export function App() {
       .get<ShoppingList[]>('/api/lists/all/' + usrId)
       .then((response) => setShoppingLists(response.data))
       .catch((error_) => setErrorlog(error_));
+  }
+
+  const handleError = (errmes: string) => {
+    setErrorlog(errmes)
   }
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
@@ -106,12 +111,17 @@ export function App() {
             setSelectedListId(newList.id);
             setScreen('lists');
           })
-          .catch((error_) => setErrorlog(error_));
+          .catch( (error_) => setErrorlog(error_) );
   }
 
-  const handleOpenList = (listId: number) => {
-    setSelectedListId(listId)
-    setScreen('details')
+  const handleOpenList = (listId: string) => {
+    axios.get("api/lists/" + listId)
+          .then( (response) => {
+            setprocessingList(response.data)
+            setSelectedListId(listId);
+            setScreen('details');
+          })
+          .catch( (error_) => setErrorlog(error_) );
   }
 
   const handleAddItem = (event: FormEvent<HTMLFormElement>) => {
@@ -198,7 +208,7 @@ export function App() {
     setShoppingLists(updatedLists)
   }
 
-  const handleDeleteList = (listId: number) => {
+  const handleDeleteList = (listId: string) => {
     const remainingLists = shoppingLists.filter((list) => list.id !== listId)
 
     if (selectedListId === listId && remainingLists.length > 0) {
@@ -224,7 +234,7 @@ export function App() {
   if (screen === 'details' && selectedList) {
     page = (
       <Detailseite
-        shoppingList={selectedList}
+        shoppingList={processingList}
         productName={productName}
         quantity={quantity}
         onProductNameChange={setProductName}
@@ -234,7 +244,7 @@ export function App() {
         onToggleItem={handleToggleItem}
         onDeleteItem={handleDeleteItem}
       />
-    )
+    );
   }
 
   if (screen === 'add'){
@@ -243,6 +253,7 @@ export function App() {
         listName={listName}
         onBack={() => setScreen('lists')}
         submitList={onHandleSubmittedList}
+        onError={handleError}
       />
     );
   }

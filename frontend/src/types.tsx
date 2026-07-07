@@ -8,7 +8,7 @@ export type ShoppingItem = {
 };
 
 export type ShoppingList = {
-  id: number;
+  id: string;
   name: string;
   date: string;
   products: ShoppingItem[];

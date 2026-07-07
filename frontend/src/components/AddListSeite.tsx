@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 
 type FormValues = {
   shoppingListName: string
@@ -8,15 +9,25 @@ type AddListSeiteProps = {
   listName: string,
   onBack: () => void,
   submitList: (listName: string) => void
+  onError: (message: string) => void
 };
 
 const AddListSeite=({
   listName,
   onBack,
-  submitList
+  submitList,
+  onError
 }:AddListSeiteProps) => {
   const { register, handleSubmit, formState: { errors, isValid }, } =
     useForm<FormValues>({ mode: 'onChange' });
+
+  useEffect(() => {
+    if(errors.shoppingListName){
+      onError(errors.shoppingListName.message!)
+    } else {
+      onError("")
+    }
+  }, [errors.shoppingListName, onError]);
 
   function submit(data: FormValues){
     submitList(data.shoppingListName);
@@ -36,13 +47,18 @@ const AddListSeite=({
       </div>
       <div className="add-content">
         <form className="list-form" onSubmit={handleSubmit(submit)}>
-          <label htmlFor="list-name">Listenname</label>
-          <input
-            id="list-name"
-            {...register('shoppingListName', {
-              required: 'Name is required!',
-            })}
-          />
+          <label htmlFor="shoppingListName">
+            Listenname
+            <input
+              id="shoppingListName"
+              {...register('shoppingListName', {
+                required: 'Name is required!',
+                minLength: {
+                  value: 5,
+                  message: "Name must be at least 5 characters long."}
+              })}
+            />
+          </label>
           <button type="submit" disabled={!isValid}>
             add Shopping List
           </button>

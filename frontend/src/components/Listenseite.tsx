@@ -4,8 +4,8 @@ import type { ShoppingList } from '../types'
 type ListenseiteProps = {
   lists: ShoppingList[],
   onAddList: () => void,
-  onOpenList: (listId: number) => void,
-  onDeleteList: (listId: number) => void
+  onOpenList: (listId: string) => void,
+  onDeleteList: (listId: string) => void
 }
 
 const Listenseite = ({ lists, onAddList, onOpenList, onDeleteList }: ListenseiteProps) => {
@@ -33,9 +33,6 @@ const Listenseite = ({ lists, onAddList, onOpenList, onDeleteList }: Listenseite
                   <small>{status}</small>
                 </span>
                 <time>{list.date}</time>
-              </button>
-              <button className="delete-button" type="button" onClick={() => onDeleteList(list.id)}>
-                del
               </button>
             </div>
           )
