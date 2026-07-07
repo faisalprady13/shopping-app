@@ -1,4 +1,4 @@
-export type Screen = 'start' | 'lists' | 'details'
+export type Screen = 'start' | 'lists' | 'details' | 'add'
 
 export type ShoppingItem = {
   id: number;
@@ -14,6 +14,15 @@ export type ShoppingList = {
   products: ShoppingItem[];
 };
 
+export type User = {
+  id: string
+};
+
 export type UserDto = {
   name: string
-}
+};
+
+export type ShoppingListDto = {
+  name: string,
+  user: User
+};
