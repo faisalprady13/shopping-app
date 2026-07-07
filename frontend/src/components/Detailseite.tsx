@@ -1,5 +1,5 @@
-import type { FormEvent } from 'react'
-import type { ShoppingList } from '../types'
+import type {FormEvent} from 'react'
+import {type ShoppingList, Status} from '../types'
 
 type DetailseiteProps = {
   shoppingList: ShoppingList
@@ -41,14 +41,14 @@ const Detailseite = ({
       <div className="details-content">
         <ul className="items-list" aria-label={`${shoppingList.name} Produkte`}>
           {shoppingList.products.map((item) => (
-            <li className={item.status ? 'completed' : ''} key={item.id}>
+            <li className={item.status===Status.CLOSED ? 'completed' : ''} key={item.id}>
               <button
                 className="check-button"
                 type="button"
                 aria-label={`${item.name} als erledigt markieren`}
                 onClick={() => onToggleItem(item.id)}
               >
-                {item.status ? '✓' : ''}
+                {item.status===Status.CLOSED ? '✓' : ''}
               </button>
               <span>
                 <strong>{item.name}</strong>

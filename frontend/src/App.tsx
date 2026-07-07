@@ -158,9 +158,9 @@ export function App() {
         }
         updatedItem={
           ...item,
-          status: item.status===Status.OPEN?Status.OPEN:Status.CLOSED,
+          status: item.status===Status.OPEN?Status.CLOSED:Status.OPEN,
         }
-        axios.put("/api/lists/update-product", updatedItem)
+        axios.put("/api/lists/update-product", {...updatedItem,shoppingListId:selectedList.id})
         return updatedItem;
       })
 
