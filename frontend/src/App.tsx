@@ -1,6 +1,6 @@
-import { StrictMode, useState } from 'react';
-import type { FormEvent } from 'react'
-import { createRoot } from 'react-dom/client'
+import type {FormEvent} from 'react'
+import {StrictMode, useState} from 'react';
+import {createRoot} from 'react-dom/client'
 import './App.css'
 import './index.css'
 import Detailseite from './components/Detailseite'
@@ -8,8 +8,17 @@ import Footer from './components/Footer'
 import Header from './components/Header'
 import Listenseite from './components/Listenseite'
 import Startseite from './components/Startseite'
-import type { Screen, ShoppingItem, ShoppingList, UserDto } from './types';
+import {
+  type Screen,
+  type ShoppingItem,
+  type ShoppingList,
+  type ShoppingListDto,
+  Status,
+  type User,
+  type UserDto
+} from './types';
 import axios from 'axios';
+import AddListSeite from "./components/AddListSeite.tsx";
 
 
 export function App() {
@@ -20,6 +29,8 @@ export function App() {
   const [productName, setProductName] = useState('')
   const [quantity, setQuantity] = useState('1')
   const [errorlog, setErrorlog] = useState<string>("")
+  const [listName, setListName] = useState<string>("")
+  const [userId, setUserId] = useState<string>("")
 
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
@@ -44,20 +55,20 @@ export function App() {
       return
     }
 
-    axios
-      .post('/api/user', userDto)
-      .then( (response) => {
-        setUsername(response.data.name);
-        loadAllLists(response.data.id);
-        setScreen('lists');
-      })
-      .catch( (error_) => {
-        if(error_.status === 502){
-          setErrorlog("Keine Verbindung zum Backend!")
-        } else {
-          console.log(error_);
-        }
-      });
+    axios.post('/api/user', userDto)
+          .then( (response) => {
+            setUsername(response.data.name);
+            setUserId(response.data.id);
+            loadAllLists(response.data.id);
+            setScreen('lists');
+          })
+          .catch( (error_) => {
+            if(error_.status === 502){
+              setErrorlog("Keine Verbindung zum Backend!")
+            } else {
+              console.log(error_);
+            }
+          });
   }
 
   const handleLogout = () => {
@@ -66,21 +77,27 @@ export function App() {
   }
 
   const handleAddList = () => {
-    const nextNumber = shoppingLists.length + 1
-    const today = new Intl.DateTimeFormat('de-DE').format(new Date())
+    setListName("NEW")
+    setScreen('add')
+  }
 
-    const newList: ShoppingList = {
-      id: '',
-      name: `List ${nextNumber}`,
-      date: today,
-      products: [],
+  const onHandleSubmittedList = (shopListName: string) => {
+    const actualUser: User = {id: userId}
+    const shoppingListDto: ShoppingListDto = {
+      name: shopListName,
+      user: actualUser
     }
+    let newList: ShoppingList;
 
-    const updatedLists = [newList, ...shoppingLists]
-
-    setShoppingLists(updatedLists)
-    setSelectedListId(newList.id)
-    setScreen('details')
+    axios.post('api/lists', shoppingListDto)
+          .then( (response) => {
+            newList= response.data;
+            const updatedLists = [newList, ...shoppingLists];
+            setShoppingLists(updatedLists);
+            setSelectedListId(newList.id);
+            setScreen('lists');
+          })
+          .catch((error_) => setErrorlog(error_));
   }
 
   const handleOpenList = (listId: string) => {
@@ -99,11 +116,12 @@ export function App() {
     }
 
     const newItem: ShoppingItem =
-        await  axios.post("/api/lists/add-product", {
+        (await axios.post("/api/lists/add-product", {
           name: trimmedName,
           quantity: trimmedQuantity || '1',
-          status: false, shoppingListId:selectedList.id
-        });
+          status: Status.OPEN,
+          shoppingListId: selectedList.id
+        })).data;
 
     const updatedLists = shoppingLists.map((list) => {
       if (list.id !== selectedList.id) {
@@ -115,7 +133,7 @@ export function App() {
         products: [...list.products, newItem],
       }
     })
-
+    console.log(updatedLists)
     setShoppingLists(updatedLists)
     setProductName('')
     setQuantity('1')
@@ -140,7 +158,7 @@ export function App() {
         }
         updatedItem={
           ...item,
-          status: !item.status,
+          status: item.status===Status.OPEN?Status.OPEN:Status.CLOSED,
         }
         axios.put("/api/lists/update-product", updatedItem)
         return updatedItem;
@@ -214,6 +232,16 @@ export function App() {
         onDeleteItem={handleDeleteItem}
       />
     )
+  }
+
+  if (screen === 'add'){
+    page = (
+      <AddListSeite
+        listName={listName}
+        onBack={() => setScreen('lists')}
+        submitList={onHandleSubmittedList}
+      />
+    );
   }
 
   return (
