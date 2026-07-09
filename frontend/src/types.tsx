@@ -1,10 +1,10 @@
 export type Screen = 'start' | 'lists' | 'details' | 'add'
 
 export type ShoppingItem = {
-  id: string;
-  name: string;
-  quantity: string;
-  status: Status;
+  id: string,
+  name: string,
+  quantity: string,
+  status: Status
 };
 
 export type ShoppingList = {
@@ -30,5 +30,5 @@ export type ShoppingListDto = {
 // @ts-ignore
 export enum Status {
   OPEN='OPEN',
-  CLOSED='CLOSED',
+  CLOSED='CLOSED'
 }
