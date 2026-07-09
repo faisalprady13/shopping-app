@@ -27,14 +27,7 @@ const initialLists: ShoppingList[] = [
     date: '29.06.2026',
     products: [
     ],
-  },
-  {
-    id: '2',
-    name: 'List 2',
-    date: '28.06.2026',
-    products: [
-    ],
-  },
+  }
 ]
 
 export function App() {
@@ -42,12 +35,10 @@ export function App() {
   const [username, setUsername] = useState('')
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([])
   const [selectedListId, setSelectedListId] = useState<string|null>(null)
-  const [productName, setProductName] = useState('')
-  const [quantity, setQuantity] = useState('1')
-  const [errorlog, setErrorlog] = useState<string>("")
+  const [errorLog, setErrorLog] = useState<string>("")
   const [listName, setListName] = useState<string>("")
   const [userId, setUserId] = useState<string>("")
-  const [processingList, setprocessingList] = useState<ShoppingList>(initialLists[0]);
+  const [processingList, setProcessingList] = useState<ShoppingList>(initialLists[0]);
 
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
@@ -60,11 +51,11 @@ export function App() {
               }
              }
          )
-         .catch( (e) => setErrorlog(e.message) );
+         .catch( (e) => setErrorLog(e.message) );
   }
 
-  const handleError = (errmes: string) => {
-    setErrorlog(errmes)
+  const handleError = (errorMessage: string) => {
+    setErrorLog(errorMessage)
   }
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
@@ -81,11 +72,12 @@ export function App() {
             setUsername(response.data.name);
             setUserId(response.data.id);
             loadAllLists(response.data.id);
+            setErrorLog("");
             setScreen('lists');
           })
           .catch( (error_) => {
             if(error_.status === 502){
-              setErrorlog("Keine Verbindung zum Backend!")
+              setErrorLog("Keine Verbindung zum Backend!")
             } else {
               console.log(error_);
             }
@@ -118,56 +110,51 @@ export function App() {
             setSelectedListId(newList.id);
             setScreen('lists');
           })
-          .catch( (error_) => setErrorlog(error_) );
+          .catch( (error_) => setErrorLog(error_) );
   }
 
   const handleOpenList = (listId: string) => {
     axios.get("api/lists/" + listId)
           .then( (response) => {
-            setprocessingList(response.data)
+            setProcessingList(response.data)
             setSelectedListId(listId);
             setScreen('details');
           })
-          .catch( (error_) => setErrorlog(error_) );
+          .catch( (error_) => setErrorLog(error_) );
   }
 
-  const handleAddItem =async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const trimmedName = productName.trim()
-    const trimmedQuantity = quantity.trim()
+  const handleAddItem = async (productName: string, quantity: number) => {
+    const trimmedName = productName.trim();
 
     if (trimmedName === '' || !selectedList) {
-      return
+      return;
     }
 
-    const newItem: ShoppingItem =
-        (await axios.post("/api/lists/add-product", {
-          name: trimmedName,
-          quantity: trimmedQuantity || '1',
-          status: Status.OPEN,
-          shoppingListId: selectedList.id
-        })).data;
+    const newItem: ShoppingItem = (
+      await axios.post('/api/lists/add-product', {
+        name: trimmedName,
+        quantity: quantity || 1,
+        status: Status.OPEN,
+        shoppingListId: selectedList.id,
+      })
+    ).data;
 
     const updatedLists = shoppingLists.map((list) => {
       if (list.id !== selectedList.id) {
-        return list
+        return list;
       }
-      setprocessingList({
+      setProcessingList({
         ...list,
         products: [...list.products, newItem],
-      })
+      });
 
       return {
         ...list,
         products: [...list.products, newItem],
-      }
-    })
-    setShoppingLists(updatedLists)
-    setProductName('')
-    setQuantity('1')
-
-  }
+      };
+    });
+    setShoppingLists(updatedLists);
+  };
 
   const handleToggleItem = (itemId: string) => {
     if (!selectedList) {
@@ -187,13 +174,13 @@ export function App() {
         }
         updatedItem={
           ...item,
-          status: item.status===Status.OPEN?Status.CLOSED:Status.OPEN,
+          status: item.status===Status.OPEN?Status.CLOSED:Status.OPEN
         }
         axios.put("/api/lists/update-product", {...updatedItem,shoppingListId:selectedList.id})
         return updatedItem;
       })
 
-      setprocessingList({
+      setProcessingList({
         ...list,
         products: updatedItems,
       })
@@ -203,7 +190,6 @@ export function App() {
         products: updatedItems,
       }
     })
-    console.log(updatedLists)
     setShoppingLists(updatedLists)
   }
 
@@ -219,7 +205,7 @@ export function App() {
 
       const remainingItems = list.products.filter((item) => item.id !== itemId)
 
-      setprocessingList({
+      setProcessingList({
         ...list,
         products: remainingItems,
       })
@@ -233,16 +219,6 @@ export function App() {
     axios.delete(`/api/lists/remove-product/${itemId}`)
   }
 
-  const handleDeleteList = (listId: string) => {
-    const remainingLists = shoppingLists.filter((list) => list.id !== listId)
-
-    if (selectedListId === listId && remainingLists.length > 0) {
-      setSelectedListId(remainingLists[0].id)
-    }
-
-    setShoppingLists(remainingLists)
-  }
-
   let page = <Startseite username={username} onUsernameChange={setUsername} onLogin={handleLogin} />
 
   if (screen === 'lists') {
@@ -251,7 +227,6 @@ export function App() {
         lists={shoppingLists}
         onAddList={handleAddList}
         onOpenList={handleOpenList}
-        onDeleteList={handleDeleteList}
       />
     )
   }
@@ -260,14 +235,11 @@ export function App() {
     page = (
       <Detailseite
         shoppingList={processingList}
-        productName={productName}
-        quantity={quantity}
-        onProductNameChange={setProductName}
-        onQuantityChange={setQuantity}
         onBack={() => setScreen('lists')}
         onAddItem={handleAddItem}
         onToggleItem={handleToggleItem}
         onDeleteItem={handleDeleteItem}
+        onError={handleError}
       />
     );
   }
@@ -289,7 +261,7 @@ export function App() {
 
       <main className="app-content">{page}</main>
 
-      <Footer errormessage={errorlog} />
+      <Footer errormessage={errorLog} />
     </div>
   )
 }
