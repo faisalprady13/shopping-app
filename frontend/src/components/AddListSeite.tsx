@@ -8,9 +8,9 @@ type FormValues = {
 type AddListSeiteProps = {
   listName: string,
   onBack: () => void,
-  submitList: (listName: string) => void
+  submitList: (listName: string) => void,
   onError: (message: string) => void
-};
+}
 
 const AddListSeite=({
   listName,

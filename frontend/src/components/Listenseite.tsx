@@ -4,8 +4,7 @@ import {type ShoppingList, Status} from '../types'
 type ListenseiteProps = {
   lists: ShoppingList[],
   onAddList: () => void,
-  onOpenList: (listId: string) => void,
-  onDeleteList: (listId: string) => void
+  onOpenList: (listId: string) => void
 }
 
 const Listenseite = ({ lists, onAddList, onOpenList }: ListenseiteProps) => {

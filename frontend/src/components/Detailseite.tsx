@@ -1,29 +1,49 @@
-import type {FormEvent} from 'react'
+import  { useEffect } from 'react'
 import {type ShoppingList, Status} from '../types'
+import { useForm } from 'react-hook-form';
+
+type FormValues = {
+  productName: string,
+  quantity: number
+}
 
 type DetailseiteProps = {
-  shoppingList: ShoppingList
-  productName: string
-  quantity: string
-  onProductNameChange: (productName: string) => void
-  onQuantityChange: (quantity: string) => void
-  onBack: () => void
-  onAddItem: (event: FormEvent<HTMLFormElement>) =>Promise<void>
-  onToggleItem: (itemId: string) => void
-  onDeleteItem: (itemId: string) => void
+  shoppingList: ShoppingList,
+  onBack: () => void;
+  onAddItem: (productName: string, quantity: number) => Promise<void>,
+  onToggleItem: (itemId: string) => void,
+  onDeleteItem: (itemId: string) => void,
+  onError: (message: string) => void
 }
 
 const Detailseite = ({
   shoppingList,
-  productName,
-  quantity,
-  onProductNameChange,
-  onQuantityChange,
   onBack,
   onAddItem,
   onToggleItem,
   onDeleteItem,
+  onError
 }: DetailseiteProps) => {
+  const { register, handleSubmit,
+          reset,
+          formState: { errors, isValid },
+  } = useForm<FormValues>({ mode: 'onChange' });
+
+  useEffect(() => {
+    if (errors.productName) {
+      onError(errors.productName.message!);
+    } else if (errors.quantity){
+      onError(errors.quantity.message!)
+    } else {
+      onError('');
+    }
+  }, [errors.productName, errors.quantity, onError]);
+
+  function submit(data: FormValues){
+    reset({productName: '', quantity: 0})
+    onAddItem(data.productName, data.quantity)
+  }
+
   return (
     <section className="wire-panel details-panel" aria-labelledby="details-title">
       <header className="page-title details-title">
@@ -41,14 +61,14 @@ const Detailseite = ({
       <div className="details-content">
         <ul className="items-list" aria-label={`${shoppingList.name} Produkte`}>
           {shoppingList.products.map((item) => (
-            <li className={item.status===Status.CLOSED ? 'completed' : ''} key={item.id}>
+            <li className={item.status === Status.CLOSED ? 'completed' : ''} key={item.id}>
               <button
                 className="check-button"
                 type="button"
                 aria-label={`${item.name} als erledigt markieren`}
                 onClick={() => onToggleItem(item.id)}
               >
-                {item.status===Status.CLOSED ? '✓' : ''}
+                {item.status === Status.CLOSED ? '✓' : ''}
               </button>
               <span>
                 <strong>{item.name}</strong>
@@ -61,24 +81,36 @@ const Detailseite = ({
           ))}
         </ul>
 
-        <form className="item-form" onSubmit={onAddItem}>
-          <label htmlFor="product-name">Produktname</label>
-          <label htmlFor="product-quantity">Menge</label>
-          <input
-            id="product-name"
-            value={productName}
-            onChange={(event) => onProductNameChange(event.target.value)}
-          />
-          <input
-            id="product-quantity"
-            value={quantity}
-            onChange={(event) => onQuantityChange(event.target.value)}
-          />
-          <button type="submit">add item</button>
+        <form className="item-form" onSubmit={handleSubmit(submit)}>
+          <label htmlFor="product-name">
+            Produktname
+            <input
+              id="product-name"
+              {...register('productName', {
+                required: 'Productname is required!',
+              })}
+            />
+          </label>
+          <label htmlFor="product-quantity">
+            Menge
+            <input
+              id="product-quantity"
+              {...register('quantity', {
+                required: 'Quantity is required!',
+                min: {
+                  value: 1,
+                  message: 'Quantity must be greater than 0!',
+                },
+              })}
+            />
+          </label>
+          <button type="submit" disabled={!isValid}>
+            add item
+          </button>
         </form>
       </div>
     </section>
-  )
+  );
 }
 
 export default Detailseite
