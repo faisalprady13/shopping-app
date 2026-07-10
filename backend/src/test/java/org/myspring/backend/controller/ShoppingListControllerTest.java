@@ -14,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
@@ -41,13 +43,15 @@ class ShoppingListControllerTest {
     private ProductRepo productRepo;
 
     @Test
+    @WithMockUser
     void getAllLists_shouldReturnEmptyJson_whenInitiallyStarted() throws Exception {
-        mvc.perform(get("/api/lists"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/lists"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
     }
 
     @Test
+    @WithMockUser
     void getAllLists_shouldReturnJsonList_whenCalled() throws Exception {
         Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         User user = new User("6", "Max", null);
@@ -59,12 +63,13 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(get("/api/lists"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/lists"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
     }
 
     @Test
+    @WithMockUser
     void createList_shouldReturnShoppingList_whenCreated() throws Exception {
         User user = new User("6", "Max", null);
         ShoppingListDTO shoppingList = new ShoppingListDTO("Test", user);
@@ -72,7 +77,7 @@ class ShoppingListControllerTest {
         String jsonList = mapper.writeValueAsString(shoppingList);
 
         userRepo.save(user);
-        mvc.perform(post("/api/lists")
+        mvc.perform(MockMvcRequestBuilders.post("/api/lists")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonList))
                 .andExpect(status().isCreated())
@@ -86,6 +91,7 @@ class ShoppingListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void getListById_shouldReturnShoppingList_whenFound() throws Exception {
         String id = "1";
         Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
@@ -98,23 +104,25 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(get("/api/lists/" + id))
+        mvc.perform(MockMvcRequestBuilders.get("/api/lists/" + id))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
     }
 
     @Test
+    @WithMockUser
     void getListById_shouldThrowException_whenNotFound() throws Exception {
         String id = "0";
         String errorMessage = "Die Einkaufsliste wurde nicht gefunden: ";
 
         errorMessage += "List with id 0 not found!";
-        mvc.perform(get("/api/lists/" + id))
+        mvc.perform(MockMvcRequestBuilders.get("/api/lists/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(errorMessage));
     }
 
     @Test
+    @WithMockUser
     void addProduct_shouldReturnProduct_whenAdded() throws Exception {
         String listId = "1";
         Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
@@ -126,7 +134,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(post("/api/lists/add-product")
+        mvc.perform(MockMvcRequestBuilders.post("/api/lists/add-product")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isOk())
@@ -137,13 +145,14 @@ class ShoppingListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void addProduct_shouldThrowException_whenListNotFound() throws Exception {
         String listId = "0";
         String errorMessage = "Die Einkaufsliste wurde nicht gefunden: List with id 0 not found!";
         ProductDTO productDto = new ProductDTO(null, "Milk", 2, ProductStatus.OPEN, listId);
         ObjectMapper mapper = new ObjectMapper();
 
-        mvc.perform(post("/api/lists/add-product")
+        mvc.perform(MockMvcRequestBuilders.post("/api/lists/add-product")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isNotFound())
@@ -151,6 +160,7 @@ class ShoppingListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateProduct_shouldReturnShoppingListWithUpdatedProduct_whenUpdated() throws Exception {
         String listId = "1";
         String productId = "10";
@@ -165,7 +175,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(put("/api/lists/update-product")
+        mvc.perform(MockMvcRequestBuilders.put("/api/lists/update-product")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isOk())
@@ -175,6 +185,7 @@ class ShoppingListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void updateProduct_shouldThrowException_whenProductNotFound() throws Exception {
         String listId = "1";
         Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
@@ -187,7 +198,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(put("/api/lists/update-product")
+        mvc.perform(MockMvcRequestBuilders.put("/api/lists/update-product")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isNotFound())
@@ -195,6 +206,7 @@ class ShoppingListControllerTest {
     }
 
     @Test
+    @WithMockUser
     void removeProduct_shouldReturnShoppingListWithoutProduct_whenRemoved() throws Exception {
         String listId = "1";
         String productId = "10";
@@ -209,19 +221,21 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(delete("/api/lists/remove-product/" + productId))
+        mvc.perform(MockMvcRequestBuilders.delete("/api/lists/remove-product/" + productId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.products").isEmpty());
     }
 
     @Test
+    @WithMockUser
     void removeProduct_shouldThrowException_whenProductNotFound() throws Exception {
 
-        mvc.perform(delete("/api/lists/remove-product/10"))
+        mvc.perform(MockMvcRequestBuilders.delete("/api/lists/remove-product/10"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    @WithMockUser
     void getListsByUserId_shouldReturnJsonList_whenUserFound() throws Exception {
         String userId = "6";
         Instant date = Instant.now().truncatedTo(ChronoUnit.SECONDS);
@@ -234,7 +248,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(get("/api/lists/all/" + userId))
+        mvc.perform(MockMvcRequestBuilders.get("/api/lists/all/" + userId))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
     }
