@@ -1,5 +1,4 @@
-import type {FormEvent} from 'react'
-import {StrictMode, useState} from 'react';
+import {StrictMode, useCallback, useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client'
 import './App.css'
 import './index.css'
@@ -10,15 +9,49 @@ import Listenseite from './components/Listenseite'
 import Startseite from './components/Startseite'
 import {
   type Screen,
+  type LoginDto,
+  type RegisterDto,
+  type SafeUser,
   type ShoppingItem,
   type ShoppingList,
   type ShoppingListDto,
   Status,
   type User,
-  type UserDto
 } from './types';
 import axios from 'axios';
 import AddListSeite from "./components/AddListSeite.tsx";
+
+axios.defaults.withCredentials = true
+
+const storedUserKey = 'shopping-app-user'
+
+type StoredUser = Pick<SafeUser, 'id' | 'name' | 'email'>
+
+const readInitialUser = (): StoredUser | null => {
+  const params = new URLSearchParams(window.location.search)
+  const oauthUserId = params.get('userId')
+  const oauthName = params.get('name')
+  const oauthEmail = params.get('email') ?? ''
+
+  if (oauthUserId && oauthName) {
+    const oauthUser = { id: oauthUserId, name: oauthName, email: oauthEmail }
+    localStorage.setItem(storedUserKey, JSON.stringify(oauthUser))
+    return oauthUser
+  }
+
+  const storedUser = localStorage.getItem(storedUserKey)
+  if (!storedUser) {
+    return null
+  }
+
+  try {
+    const parsedUser = JSON.parse(storedUser) as StoredUser
+    return parsedUser.id && parsedUser.name ? parsedUser : null
+  } catch {
+    localStorage.removeItem(storedUserKey)
+    return null
+  }
+}
 
 const initialLists: ShoppingList[] = [
   {
@@ -31,19 +64,30 @@ const initialLists: ShoppingList[] = [
 ]
 
 export function App() {
-  const [screen, setScreen] = useState<Screen>('start')
-  const [username, setUsername] = useState('')
+  const [initialUser] = useState<StoredUser | null>(() => readInitialUser())
+  const [screen, setScreen] = useState<Screen>(initialUser ? 'lists' : 'start')
+  const [username, setUsername] = useState(initialUser?.name ?? '')
+  const [email, setEmail] = useState(initialUser?.email ?? '')
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([])
   const [selectedListId, setSelectedListId] = useState<string|null>(null)
   const [errorLog, setErrorLog] = useState<string>("")
   const [listName, setListName] = useState<string>("")
-  const [userId, setUserId] = useState<string>("")
+  const [userId, setUserId] = useState<string>(initialUser?.id ?? "")
   const [processingList, setProcessingList] = useState<ShoppingList>(initialLists[0]);
 
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
 
-  function loadAllLists (usrId: string){
+  const clearUserState = useCallback(() => {
+    setUsername('')
+    setEmail('')
+    setUserId('')
+    setShoppingLists([])
+    localStorage.removeItem(storedUserKey)
+    setScreen('start')
+  }, [])
+
+  const loadAllLists = useCallback((usrId: string) => {
     axios.get<ShoppingList[]>("/api/lists/all/" + usrId)
          .then( (response) => {
            if(response.data) {
@@ -51,42 +95,77 @@ export function App() {
               }
              }
          )
-         .catch( (e) => setErrorLog(e.message) );
+         .catch( (e) => {
+           if (axios.isAxiosError(e) && (e.response?.status === 401 || e.response?.status === 403)) {
+             clearUserState()
+             setErrorLog('Bitte erneut anmelden.')
+             return
+           }
+           setErrorLog(e.message)
+         });
+  }, [clearUserState])
+
+  const persistUser = (user: StoredUser) => {
+    setUsername(user.name)
+    setEmail(user.email)
+    setUserId(user.id)
+    localStorage.setItem(storedUserKey, JSON.stringify(user))
+    setErrorLog('')
+    setScreen('lists')
   }
+
+  useEffect(() => {
+    if (window.location.search) {
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!userId) {
+      return
+    }
+
+    loadAllLists(userId)
+  }, [loadAllLists, userId])
 
   const handleError = (errorMessage: string) => {
     setErrorLog(errorMessage)
   }
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
-    const userDto: UserDto= {"name": username}
-
-    event.preventDefault()
-
-    if (username.trim() === '') {
-      return
+  const resolveAuthError = (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        return 'E-Mail oder Passwort ist falsch.'
+      }
+      if (error.response?.status === 409) {
+        return 'Diese E-Mail ist bereits registriert.'
+      }
+      if (error.response?.status === 400) {
+        return error.response.data?.detail ?? 'Bitte pruefe deine Eingaben.'
+      }
+      if (error.status === 502) {
+        return 'Keine Verbindung zum Backend!'
+      }
     }
 
-    axios.post('/api/user', userDto)
-          .then( (response) => {
-            setUsername(response.data.name);
-            setUserId(response.data.id);
-            loadAllLists(response.data.id);
-            setErrorLog("");
-            setScreen('lists');
-          })
-          .catch( (error_) => {
-            if(error_.status === 502){
-              setErrorLog("Keine Verbindung zum Backend!")
-            } else {
-              console.log(error_);
-            }
-          });
+    return 'Anmeldung fehlgeschlagen.'
+  }
+
+  const handleLogin = (loginDto: LoginDto) => {
+    axios.post<SafeUser>('/api/auth/login', loginDto)
+      .then((response) => persistUser(response.data))
+      .catch((error_) => setErrorLog(resolveAuthError(error_)))
+  }
+
+  const handleRegister = (registerDto: RegisterDto) => {
+    axios.post<SafeUser>('/api/auth/register', registerDto)
+      .then((response) => persistUser(response.data))
+      .catch((error_) => setErrorLog(resolveAuthError(error_)))
   }
 
   const handleLogout = () => {
-    setUsername('')
-    setScreen('start')
+    axios.post('/api/auth/logout').catch(() => undefined)
+    clearUserState()
   }
 
   const handleAddList = () => {
@@ -219,7 +298,7 @@ export function App() {
     axios.delete(`/api/lists/remove-product/${itemId}`)
   }
 
-  let page = <Startseite username={username} onUsernameChange={setUsername} onLogin={handleLogin} />
+  let page = <Startseite onLogin={handleLogin} onRegister={handleRegister} />
 
   if (screen === 'lists') {
     page = (
@@ -257,7 +336,7 @@ export function App() {
 
   return (
     <div className="app-shell">
-      <Header username={username} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <Header username={username} email={email} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
 
       <main className="app-content">{page}</main>
 

@@ -5,11 +5,13 @@ import org.myspring.backend.dto.ProductDTO;
 import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ProductStatus;
+import org.myspring.backend.model.Role;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.ListRepo;
 import org.myspring.backend.repository.ProductRepo;
 import org.myspring.backend.repository.UserRepo;
+import org.myspring.backend.security.AuthenticatedUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -251,6 +254,11 @@ class ShoppingListControllerTest {
         mvc.perform(MockMvcRequestBuilders.get("/api/lists/all/" + userId))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
+    }
+
+    private UsernamePasswordAuthenticationToken adminAuth() {
+        AuthenticatedUser principal = new AuthenticatedUser("6", "Max", "max@example.com", Role.ADMIN);
+        return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
     }
 
 }
