@@ -22,13 +22,34 @@ export type UserDto = {
   name: string
 };
 
+export type AuthProvider = 'LOCAL' | 'GOOGLE' | 'GITHUB'
+
+export type SafeUser = {
+  id: string
+  name: string
+  email: string
+  authProvider: AuthProvider
+}
+
+export type RegisterDto = {
+  name: string
+  email: string
+  password: string
+}
+
+export type LoginDto = {
+  email: string
+  password: string
+}
+
 export type ShoppingListDto = {
   name: string,
   user: User
 };
 
-// @ts-ignore
-export enum Status {
-  OPEN='OPEN',
-  CLOSED='CLOSED'
-}
+export const Status = {
+  OPEN: 'OPEN',
+  CLOSED: 'CLOSED',
+} as const
+
+export type Status = typeof Status[keyof typeof Status]

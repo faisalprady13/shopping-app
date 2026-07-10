@@ -1,5 +1,6 @@
 type HeaderProps = {
   username: string
+  email: string
   isLoggedIn: boolean
   onLogout: () => void
 }
@@ -13,7 +14,7 @@ export const PageHeader = ({ title, subtitle }: { title: string; subtitle?: stri
   )
 }
 
-const Header = ({ username, isLoggedIn, onLogout }: HeaderProps) => {
+const Header = ({ username, email, isLoggedIn, onLogout }: HeaderProps) => {
   const status = isLoggedIn ? 'login' : 'logout'
   const displayedUsername = isLoggedIn ? username : 'Guest'
 
@@ -23,6 +24,7 @@ const Header = ({ username, isLoggedIn, onLogout }: HeaderProps) => {
 
       <div className="app-user-info">
         <span>Username: {displayedUsername}</span>
+        {isLoggedIn && email ? <span>E-Mail: {email}</span> : null}
         <span>Status: {status}</span>
       </div>
 
