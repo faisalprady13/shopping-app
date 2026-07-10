@@ -111,6 +111,14 @@ public class ShoppingListService {
         return newProduct;
     }
 
+    public ShoppingList getListByProductId(String productId) throws ProductNotFound {
+        Product product = productRepo.findById(productId).orElseThrow(() -> new ProductNotFound(
+                "Product " + productId + " not found in shopping list"
+        ));
+
+        return product.getShoppingList();
+    }
+
     public ShoppingList removeProductFromShoppingList(String productId) throws ListIdNotFound, ProductNotFound {
         Product product = productRepo.findById(productId).orElseThrow(() -> new ProductNotFound(
                 "Product " + productId + " not found in shopping list"

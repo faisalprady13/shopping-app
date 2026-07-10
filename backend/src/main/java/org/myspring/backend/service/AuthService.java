@@ -5,6 +5,7 @@ import org.myspring.backend.dto.LoginDTO;
 import org.myspring.backend.dto.RegisterDTO;
 import org.myspring.backend.dto.SafeUserDTO;
 import org.myspring.backend.model.AuthProvider;
+import org.myspring.backend.model.Role;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.UserRepo;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ public class AuthService {
                 passwordEncoder.encode(registerDto.password()),
                 AuthProvider.LOCAL,
                 null,
+                Role.USER,
                 new ArrayList<>()
         );
 
@@ -43,6 +45,10 @@ public class AuthService {
     }
 
     public SafeUserDTO login(LoginDTO loginDto) {
+        return SafeUserDTO.from(validateLogin(loginDto));
+    }
+
+    public User validateLogin(LoginDTO loginDto) {
         String email = normalizeEmail(loginDto.email());
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
@@ -51,7 +57,7 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        return SafeUserDTO.from(user);
+        return user;
     }
 
     private void validateRegistration(RegisterDTO registerDto, String email) {

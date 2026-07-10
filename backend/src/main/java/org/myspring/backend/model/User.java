@@ -28,23 +28,26 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;
     private String providerId;
+    @Enumerated(EnumType.STRING)
+    private Role role;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ShoppingList> shoppingLists;
 
     public User(String id, String name, List<ShoppingList> shoppingLists) {
-        this(id, name, null, null, AuthProvider.LOCAL, null, shoppingLists);
+        this(id, name, null, null, AuthProvider.LOCAL, null, Role.USER, shoppingLists);
     }
 
     @Builder
     public User(String id, String name, String email, String passwordHash, AuthProvider authProvider,
-                String providerId, List<ShoppingList> shoppingLists) {
+                String providerId, Role role, List<ShoppingList> shoppingLists) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
         this.authProvider = authProvider;
         this.providerId = providerId;
+        this.role = role == null ? Role.USER : role;
         this.shoppingLists = shoppingLists;
     }
 
@@ -54,6 +57,7 @@ public class User {
         this.id = id;
         this.name = userDto.name();
         this.authProvider = AuthProvider.LOCAL;
+        this.role = Role.USER;
         this.shoppingLists = list;
     }
 }

@@ -23,12 +23,14 @@ export type UserDto = {
 };
 
 export type AuthProvider = 'LOCAL' | 'GOOGLE' | 'GITHUB'
+export type Role = 'USER' | 'ADMIN'
 
 export type SafeUser = {
   id: string
   name: string
   email: string
   authProvider: AuthProvider
+  role: Role
 }
 
 export type RegisterDto = {

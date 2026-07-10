@@ -17,12 +17,14 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final OAuth2UserService oAuth2UserService;
+    private final SessionService sessionService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
         User user = oAuth2UserService.getOrCreateUser(token.getAuthorizedClientRegistrationId(), token.getPrincipal());
+        sessionService.login(user, request, response);
 
         String redirectUrl = UriComponentsBuilder
                 .fromUriString("http://localhost:5173")

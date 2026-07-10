@@ -1,4 +1,4 @@
-import {StrictMode, useEffect, useState} from 'react';
+import {StrictMode, useCallback, useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client'
 import './App.css'
 import './index.css'
@@ -20,6 +20,8 @@ import {
 } from './types';
 import axios from 'axios';
 import AddListSeite from "./components/AddListSeite.tsx";
+
+axios.defaults.withCredentials = true
 
 const storedUserKey = 'shopping-app-user'
 
@@ -76,7 +78,16 @@ export function App() {
   const selectedList = shoppingLists.find((list) => list.id === selectedListId)
   const isLoggedIn = screen !== 'start'
 
-  function loadAllLists (usrId: string){
+  const clearUserState = useCallback(() => {
+    setUsername('')
+    setEmail('')
+    setUserId('')
+    setShoppingLists([])
+    localStorage.removeItem(storedUserKey)
+    setScreen('start')
+  }, [])
+
+  const loadAllLists = useCallback((usrId: string) => {
     axios.get<ShoppingList[]>("/api/lists/all/" + usrId)
          .then( (response) => {
            if(response.data) {
@@ -84,8 +95,15 @@ export function App() {
               }
              }
          )
-         .catch( (e) => setErrorLog(e.message) );
-  }
+         .catch( (e) => {
+           if (axios.isAxiosError(e) && (e.response?.status === 401 || e.response?.status === 403)) {
+             clearUserState()
+             setErrorLog('Bitte erneut anmelden.')
+             return
+           }
+           setErrorLog(e.message)
+         });
+  }, [clearUserState])
 
   const persistUser = (user: StoredUser) => {
     setUsername(user.name)
@@ -108,7 +126,7 @@ export function App() {
     }
 
     loadAllLists(userId)
-  }, [userId])
+  }, [loadAllLists, userId])
 
   const handleError = (errorMessage: string) => {
     setErrorLog(errorMessage)
@@ -146,12 +164,8 @@ export function App() {
   }
 
   const handleLogout = () => {
-    setUsername('')
-    setEmail('')
-    setUserId('')
-    setShoppingLists([])
-    localStorage.removeItem(storedUserKey)
-    setScreen('start')
+    axios.post('/api/auth/logout').catch(() => undefined)
+    clearUserState()
   }
 
   const handleAddList = () => {

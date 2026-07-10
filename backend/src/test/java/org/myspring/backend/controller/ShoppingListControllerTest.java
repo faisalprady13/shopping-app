@@ -5,15 +5,18 @@ import org.myspring.backend.dto.ProductDTO;
 import org.myspring.backend.dto.ShoppingListDTO;
 import org.myspring.backend.model.Product;
 import org.myspring.backend.model.ProductStatus;
+import org.myspring.backend.model.Role;
 import org.myspring.backend.model.ShoppingList;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.ListRepo;
 import org.myspring.backend.repository.ProductRepo;
 import org.myspring.backend.repository.UserRepo;
+import org.myspring.backend.security.AuthenticatedUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -42,7 +46,7 @@ class ShoppingListControllerTest {
 
     @Test
     void getAllLists_shouldReturnEmptyJson_whenInitiallyStarted() throws Exception {
-        mvc.perform(get("/api/lists"))
+        mvc.perform(get("/api/lists").with(authentication(adminAuth())))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
     }
@@ -59,7 +63,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(get("/api/lists"))
+        mvc.perform(get("/api/lists").with(authentication(adminAuth())))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
     }
@@ -72,7 +76,7 @@ class ShoppingListControllerTest {
         String jsonList = mapper.writeValueAsString(shoppingList);
 
         userRepo.save(user);
-        mvc.perform(post("/api/lists")
+        mvc.perform(post("/api/lists").with(authentication(adminAuth()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonList))
                 .andExpect(status().isCreated())
@@ -98,7 +102,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(get("/api/lists/" + id))
+        mvc.perform(get("/api/lists/" + id).with(authentication(adminAuth())))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
     }
@@ -109,7 +113,7 @@ class ShoppingListControllerTest {
         String errorMessage = "Die Einkaufsliste wurde nicht gefunden: ";
 
         errorMessage += "List with id 0 not found!";
-        mvc.perform(get("/api/lists/" + id))
+        mvc.perform(get("/api/lists/" + id).with(authentication(adminAuth())))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(errorMessage));
     }
@@ -126,7 +130,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(post("/api/lists/add-product")
+        mvc.perform(post("/api/lists/add-product").with(authentication(adminAuth()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isOk())
@@ -143,7 +147,7 @@ class ShoppingListControllerTest {
         ProductDTO productDto = new ProductDTO(null, "Milk", 2, ProductStatus.OPEN, listId);
         ObjectMapper mapper = new ObjectMapper();
 
-        mvc.perform(post("/api/lists/add-product")
+        mvc.perform(post("/api/lists/add-product").with(authentication(adminAuth()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isNotFound())
@@ -165,7 +169,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(put("/api/lists/update-product")
+        mvc.perform(put("/api/lists/update-product").with(authentication(adminAuth()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isOk())
@@ -187,7 +191,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(put("/api/lists/update-product")
+        mvc.perform(put("/api/lists/update-product").with(authentication(adminAuth()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(productDto)))
                 .andExpect(status().isNotFound())
@@ -209,7 +213,7 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(delete("/api/lists/remove-product/" + productId))
+        mvc.perform(delete("/api/lists/remove-product/" + productId).with(authentication(adminAuth())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.products").isEmpty());
     }
@@ -217,7 +221,7 @@ class ShoppingListControllerTest {
     @Test
     void removeProduct_shouldThrowException_whenProductNotFound() throws Exception {
 
-        mvc.perform(delete("/api/lists/remove-product/10"))
+        mvc.perform(delete("/api/lists/remove-product/10").with(authentication(adminAuth())))
                 .andExpect(status().isNotFound());
     }
 
@@ -234,9 +238,14 @@ class ShoppingListControllerTest {
 
         userRepo.save(user);
         listRepo.save(shoppingList);
-        mvc.perform(get("/api/lists/all/" + userId))
+        mvc.perform(get("/api/lists/all/" + userId).with(authentication(adminAuth())))
                 .andExpect(status().isOk())
                 .andExpect(content().json(jsonList));
+    }
+
+    private UsernamePasswordAuthenticationToken adminAuth() {
+        AuthenticatedUser principal = new AuthenticatedUser("6", "Max", "max@example.com", Role.ADMIN);
+        return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
     }
 
 }

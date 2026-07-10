@@ -43,10 +43,12 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.name").value("Jane Doe"))
                 .andExpect(jsonPath("$.email").value("jane@example.com"))
                 .andExpect(jsonPath("$.authProvider").value("LOCAL"))
+                .andExpect(jsonPath("$.role").value("USER"))
                 .andExpect(jsonPath("$.passwordHash").doesNotExist());
 
         User savedUser = userRepo.findByEmail("jane@example.com").orElseThrow();
 
+        assertEquals("USER", savedUser.getRole().name());
         assertNotEquals("password123", savedUser.getPasswordHash());
         assertTrue(passwordEncoder.matches("password123", savedUser.getPasswordHash()));
     }
@@ -74,6 +76,7 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"))
                 .andExpect(jsonPath("$.email").value("john@example.com"))
+                .andExpect(jsonPath("$.role").value("USER"))
                 .andExpect(jsonPath("$.passwordHash").doesNotExist());
     }
 

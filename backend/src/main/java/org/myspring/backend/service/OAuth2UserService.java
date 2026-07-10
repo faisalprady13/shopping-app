@@ -2,6 +2,7 @@ package org.myspring.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.myspring.backend.model.AuthProvider;
+import org.myspring.backend.model.Role;
 import org.myspring.backend.model.User;
 import org.myspring.backend.repository.UserRepo;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -28,6 +29,7 @@ public class OAuth2UserService {
                         null,
                         provider,
                         providerId,
+                        Role.USER,
                         new ArrayList<>()
                 )));
     }
